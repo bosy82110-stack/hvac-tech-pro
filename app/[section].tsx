@@ -50,24 +50,32 @@ const compressorWorkbookGuidance = [
   "الملف الأصلي قابل للتحديث، وهذه البيانات مرجع مساعد وليست بديلًا عن تعليمات الشركة المصنعة.",
 ];
 
-type SimulatorPartType = "breaker1" | "fuse" | "switch" | "thermostat" | "highPressure" | "lowPressure" | "contactor" | "overload" | "compressor" | "transformer";
+type SimulatorPartType = "breaker1" | "breaker3" | "fuse" | "switch" | "thermostat" | "highPressure" | "lowPressure" | "contactor" | "contactor3" | "overload" | "overload3" | "compressor" | "compressor3" | "transformer";
 type SimulatorTerminal = { label: string; role: "power" | "control" | "motor" };
 type SimulatorPart = { id: string; type: SimulatorPartType; name: string; terminals: number; terminalLabels: SimulatorTerminal[] };
 const simulatorPartCatalog: Array<{ type: SimulatorPartType; name: string; terminals: number; terminalLabels: SimulatorTerminal[]; color: string }> = [
   { type: "breaker1", name: "قاطع 1 فاز", terminals: 2, terminalLabels: [{ label: "L", role: "power" }, { label: "T", role: "power" }], color: "#2563EB" },
+  { type: "breaker3", name: "قاطع 3 فاز", terminals: 6, terminalLabels: [{ label: "L1", role: "power" }, { label: "L2", role: "power" }, { label: "L3", role: "power" }, { label: "T1", role: "power" }, { label: "T2", role: "power" }, { label: "T3", role: "power" }], color: "#1D4ED8" },
   { type: "fuse", name: "فيوز", terminals: 2, terminalLabels: [{ label: "IN", role: "power" }, { label: "OUT", role: "power" }], color: "#F59E0B" },
   { type: "switch", name: "مفتاح ON/OFF", terminals: 2, terminalLabels: [{ label: "L", role: "control" }, { label: "T", role: "control" }], color: "#64748B" },
   { type: "thermostat", name: "ثرموستات", terminals: 2, terminalLabels: [{ label: "R", role: "control" }, { label: "Y", role: "control" }], color: "#0E7490" },
   { type: "highPressure", name: "هاي برشر", terminals: 2, terminalLabels: [{ label: "IN", role: "control" }, { label: "OUT", role: "control" }], color: "#DC2626" },
   { type: "lowPressure", name: "لو برشر", terminals: 2, terminalLabels: [{ label: "IN", role: "control" }, { label: "OUT", role: "control" }], color: "#7C3AED" },
   { type: "contactor", name: "كونتاكتور", terminals: 3, terminalLabels: [{ label: "L1", role: "power" }, { label: "T1", role: "power" }, { label: "A1", role: "control" }], color: "#0891B2" },
+  { type: "contactor3", name: "كونتاكتور 3 فاز", terminals: 8, terminalLabels: [{ label: "L1", role: "power" }, { label: "L2", role: "power" }, { label: "L3", role: "power" }, { label: "T1", role: "power" }, { label: "T2", role: "power" }, { label: "T3", role: "power" }, { label: "A1", role: "control" }, { label: "A2", role: "control" }], color: "#0284C7" },
   { type: "overload", name: "أوفرلود", terminals: 2, terminalLabels: [{ label: "IN", role: "power" }, { label: "OUT", role: "motor" }], color: "#EA580C" },
+  { type: "overload3", name: "أوفرلود 3 فاز", terminals: 6, terminalLabels: [{ label: "IN1", role: "power" }, { label: "IN2", role: "power" }, { label: "IN3", role: "power" }, { label: "OUT1", role: "motor" }, { label: "OUT2", role: "motor" }, { label: "OUT3", role: "motor" }], color: "#C2410C" },
   { type: "compressor", name: "كباس", terminals: 3, terminalLabels: [{ label: "C", role: "motor" }, { label: "R", role: "motor" }, { label: "S", role: "motor" }], color: "#16A34A" },
+  { type: "compressor3", name: "كباس 3 فاز", terminals: 3, terminalLabels: [{ label: "U", role: "motor" }, { label: "V", role: "motor" }, { label: "W", role: "motor" }], color: "#15803D" },
   { type: "transformer", name: "ترانس", terminals: 4, terminalLabels: [{ label: "L", role: "power" }, { label: "N", role: "power" }, { label: "24V", role: "control" }, { label: "COM", role: "control" }], color: "#475569" },
 ];
-const simulatorCommonOrder: SimulatorPartType[] = ["breaker1", "fuse", "switch", "thermostat", "highPressure", "lowPressure", "contactor", "overload", "compressor"];
+const simulatorCommonOrder: SimulatorPartType[] = ["breaker1", "breaker3", "fuse", "switch", "thermostat", "highPressure", "lowPressure", "contactor", "contactor3", "overload", "overload3", "compressor", "compressor3"];
 const simulatorAssetMap: Partial<Record<SimulatorPartType, ReturnType<typeof require>>> = {
   compressor: require("../assets/simulator/compressor-crs.jpg"),
+  compressor3: require("../assets/simulator/compressor-crs.jpg"),
+  breaker3: require("../assets/simulator/contactor-3terminals.jpg"),
+  contactor3: require("../assets/simulator/contactor-3terminals.jpg"),
+  overload3: require("../assets/simulator/overload.jpg"),
   contactor: require("../assets/simulator/contactor-3terminals.jpg"),
   overload: require("../assets/simulator/overload.jpg"),
   thermostat: require("../assets/simulator/thermostat-pressure.jpg"),
@@ -416,6 +424,7 @@ export default function SectionScreen() {
   const current = info[key] ?? info.search;
   const [query, setQuery] = useState("");
   const [simulatorParts, setSimulatorParts] = useState<SimulatorPart[]>([]);
+  const [simulatorCatalogOpen, setSimulatorCatalogOpen] = useState(false);
   const [simulatorConnections, setSimulatorConnections] = useState<Array<[string, string]>>([]);
   const [simulatorSelectedId, setSimulatorSelectedId] = useState<string | null>(null);
   const [simulatorSelectedTerminal, setSimulatorSelectedTerminal] = useState<string | null>(null);
@@ -674,10 +683,29 @@ export default function SectionScreen() {
         };
         const hasLink = (first: string | null, second: string | null) =>
           !!first && !!second && simulatorConnections.some(([a, b]) => (a === first && b === second) || (a === second && b === first));
-        if (!has("breaker1")) errors.push("أضف قاطع 1 فاز كمصدر حماية.");
-        if (!has("compressor")) errors.push("أضف كباسًا إلى الدائرة.");
-        if (!has("contactor")) errors.push("أضف كونتاكتورًا للتحكم في تشغيل الكباس.");
-        if (!has("overload")) errors.push("أضف أوفرلود لحماية الكباس.");
+        const hasThreePhase = has("breaker3") || has("contactor3") || has("overload3") || has("compressor3");
+        if (hasThreePhase) {
+          if (!has("breaker3")) errors.push("أضف قاطع 3 فاز كمصدر للفازات الثلاث.");
+          if (!has("contactor3")) errors.push("أضف كونتاكتور 3 فاز.");
+          if (!has("overload3")) errors.push("أضف أوفرلود 3 فاز.");
+          if (!has("compressor3")) errors.push("أضف كباس 3 فاز.");
+          const phasePairs = [["T1", "L1"], ["T2", "L2"], ["T3", "L3"]] as const;
+          phasePairs.forEach(([sourceLabel, contactorLabel]) => {
+            if (!hasLink(terminalId("breaker3", sourceLabel), terminalId("contactor3", contactorLabel))) errors.push(`صل خرج الفاز ${sourceLabel} من القاطع إلى دخل ${contactorLabel} في الكونتاكتور.`);
+          });
+          [["T1", "IN1"], ["T2", "IN2"], ["T3", "IN3"]].forEach(([from, to]) => {
+            if (!hasLink(terminalId("contactor3", from), terminalId("overload3", to))) errors.push(`صل ${from} من الكونتاكتور إلى ${to} في الأوفرلود.`);
+          });
+          [["OUT1", "U"], ["OUT2", "V"], ["OUT3", "W"]].forEach(([from, to]) => {
+            if (!hasLink(terminalId("overload3", from), terminalId("compressor3", to))) errors.push(`صل ${from} من الأوفرلود إلى طرف ${to} في الكباس 3 فاز.`);
+          });
+          if (has("contactor3") && has("thermostat") && !hasLink(terminalId("thermostat", "Y"), terminalId("contactor3", "A1"))) errors.push("صل خرج الثرموستات Y إلى A1 في كونتاكتور 3 فاز.");
+        } else {
+          if (!has("breaker1")) errors.push("أضف قاطع 1 فاز كمصدر حماية.");
+          if (!has("compressor")) errors.push("أضف كباسًا إلى الدائرة.");
+          if (!has("contactor")) errors.push("أضف كونتاكتورًا للتحكم في تشغيل الكباس.");
+          if (!has("overload")) errors.push("أضف أوفرلود لحماية الكباس.");
+        }
         ["breaker1", "contactor", "overload", "compressor"].forEach((type) => {
           if (has(type as SimulatorPartType) && !connected(type as SimulatorPartType)) errors.push(`المكوّن ${simulatorPartCatalog.find((item) => item.type === type)?.name ?? type} غير موصل.`);
         });
@@ -707,15 +735,19 @@ export default function SectionScreen() {
             <Text style={[styles.detailsBody, { color: colors.muted }]}>الإصدار الأول: كوّن دائرة كباس 1 فاز، اختر المكونات، ثم اضغط على مكوّنين لإنشاء سلك بينهما.</Text>
           </View>
           <Text style={[styles.simulatorSectionTitle, { color: colors.foreground }]}>المكونات</Text>
-          <View style={styles.simulatorCatalog}>
+          <Pressable onPress={() => setSimulatorCatalogOpen((open) => !open)} style={[styles.simulatorDropdownButton, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.simulatorDropdownArrow, { color: colors.muted }]}>{simulatorCatalogOpen ? "▲" : "▼"}</Text>
+            <Text style={[styles.simulatorDropdownText, { color: colors.foreground }]}>اختر مكوّنًا لإضافته إلى اللوحة</Text>
+          </Pressable>
+          {simulatorCatalogOpen && <View style={[styles.simulatorDropdownMenu, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             {simulatorPartCatalog.map((item) => (
-              <Pressable key={item.type} onPress={() => addSimulatorPart(item.type)} style={({ pressed }) => [styles.simulatorCatalogItem, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.82 }]}>
+              <Pressable key={item.type} onPress={() => { addSimulatorPart(item.type); setSimulatorCatalogOpen(false); }} style={({ pressed }) => [styles.simulatorCatalogItem, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.82 }]}>
                 <View style={[styles.simulatorColorDot, { backgroundColor: item.color }]} />
                 <Text style={[styles.simulatorCatalogText, { color: colors.foreground }]}>{item.name}</Text>
                 <Text style={[styles.simulatorAddText, { color: item.color }]}>+</Text>
               </Pressable>
             ))}
-          </View>
+          </View>}
           <View style={[styles.simulatorBoard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.simulatorBoardHeader}>
               <Text style={[styles.simulatorSectionTitle, { color: colors.foreground }]}>لوحة الدائرة</Text>
@@ -3975,6 +4007,10 @@ const styles = StyleSheet.create({
   },
   simulatorSectionTitle: { fontSize: 16, fontWeight: "900", textAlign: "right", marginTop: 14, marginBottom: 8 },
   simulatorCatalog: { gap: 8 },
+  simulatorDropdownButton: { minHeight: 54, borderWidth: 1, borderRadius: 14, paddingHorizontal: 14, flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between", marginBottom: 8 },
+  simulatorDropdownMenu: { borderWidth: 1, borderRadius: 14, padding: 8, gap: 8, marginBottom: 10 },
+  simulatorDropdownText: { flex: 1, fontSize: 14, fontWeight: "800", textAlign: "right" },
+  simulatorDropdownArrow: { fontSize: 17, fontWeight: "900", marginRight: 4 },
   simulatorCatalogItem: { minHeight: 48, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, flexDirection: "row-reverse", alignItems: "center", gap: 8 },
   simulatorColorDot: { width: 13, height: 13, borderRadius: 7 },
   simulatorCatalogText: { flex: 1, fontSize: 13, fontWeight: "800", textAlign: "right" },
