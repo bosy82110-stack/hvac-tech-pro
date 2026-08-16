@@ -40,6 +40,14 @@ type MaterialRecord = CustomMaterial & {
   detail: string;
 };
 
+const compressorWorkbookGuidance = [
+  "راجع القدرة المطلوبة أكثر من مرة قبل اعتمادها في العمل.",
+  "البيانات مستخرجة في الغالب من كتالوجات الشركات، وبعضها جُمِع من مصادر فنية عند صعوبة الوصول إلى الكتالوج.",
+  "قد تظهر فروق بسيطة في قدرة الموديل الواحد بسبب اختلاف الكتالوجات أو طريقة التشغيل.",
+  "قد يعمل بعض الموديلات بريلاي ومكثف تشغيل، بينما يعمل موديل آخر بريلاي فقط؛ لذلك راجع بيانات الموديل قبل الاستبدال.",
+  "الملف الأصلي قابل للتحديث، وهذه البيانات مرجع مساعد وليست بديلًا عن تعليمات الشركة المصنعة.",
+];
+
 const calculatorOptions: Record<string, string[]> = {
   التبريد: ["السعة التبريدية"],
   الطول: ["الطول"],
@@ -1274,6 +1282,17 @@ export default function SectionScreen() {
       });
       return (
         <View>
+          <View
+            style={[
+              styles.workbookGuidanceCard,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <Text style={[styles.workbookGuidanceTitle, { color: colors.foreground }]}>إرشادات مهمة عن بيانات الكباسات</Text>
+            {compressorWorkbookGuidance.map((note) => (
+              <Text key={note} style={[styles.workbookGuidanceText, { color: colors.muted }]}>• {note}</Text>
+            ))}
+          </View>
           <Text style={[styles.sectionHint, { color: colors.muted }]}>
             تم تنظيم {compressorModels.length.toLocaleString("ar-EG")} موديلًا
             من {compressorBrandNames.length} ماركة.
@@ -3349,6 +3368,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sectionHint: { fontSize: 12, textAlign: "right", marginBottom: 12 },
+  workbookGuidanceCard: {
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 14,
+    gap: 6,
+  },
+  workbookGuidanceTitle: { fontSize: 15, fontWeight: "900", textAlign: "right", marginBottom: 4 },
+  workbookGuidanceText: { fontSize: 12, lineHeight: 20, textAlign: "right" },
   detailCard: {
     borderWidth: 1,
     borderRadius: 18,
