@@ -3,7 +3,7 @@ import { Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextIn
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScreenContainer } from '@/components/screen-container';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useColors } from '@/hooks/use-colors';
+import { setAppThemeMode, ThemeMode, useColors, useThemeMode } from '@/hooks/use-colors';
 import { brands, CustomDiagnosis, CustomErrorCode, CustomMaterial, HvacDeviceType, ManagedBrand, materialCategories } from '@/shared/hvac-data';
 
 const DIAGNOSIS_KEY = 'hvac_custom_diagnoses';
@@ -17,6 +17,7 @@ type ModalMode = 'diagnosis' | 'error' | 'brand' | 'model' | 'material';
 
 export default function SettingsScreen() {
   const colors = useColors();
+  const themeMode = useThemeMode();
   const [diagnoses, setDiagnoses] = useState<CustomDiagnosis[]>([]);
   const [errorCodes, setErrorCodes] = useState<CustomErrorCode[]>([]);
   const [managedBrands, setManagedBrands] = useState<ManagedBrand[]>(brands);
@@ -115,7 +116,17 @@ export default function SettingsScreen() {
   const deleteError = (id: string) => Alert.alert('حذف كود العطل', 'هل تريد حذفه نهائيًا؟', [{ text: 'إلغاء', style: 'cancel' }, { text: 'حذف', style: 'destructive', onPress: async () => { const next = errorCodes.filter((x) => x.id !== id); await AsyncStorage.setItem(ERROR_KEY, JSON.stringify(next)); setErrorCodes(next); } }]);
 
   return <ScreenContainer className="px-5 pt-5"><ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 28 }}>
-    <View style={styles.header}><Text style={[styles.title, { color: colors.foreground }]}>الإعدادات</Text><Text style={[styles.subtitle, { color: colors.muted }]}>إدارة التشخيصات وأكواد الأعطال من مكان واحد</Text></View>
+    <View style={styles.header}><Text style={[styles.title, { color: colors.foreground }]}>الإعدادات</Text><Text style={[styles.subtitle, { color: colors.muted }]}>إدارة البيانات والثيم وأكواد الأعطال من مكان واحد</Text></View>
+    <View style={[styles.unifiedCard, { backgroundColor: colors.surface, borderColor: colors.border, marginBottom: 14 }]}>
+      <View style={styles.cardHeader}><View><Text style={[styles.sectionTitle, { color: colors.foreground }]}>مظهر التطبيق</Text><Text style={[styles.sectionHint, { color: colors.muted }]}>اختر الوضع الليلي أو النهاري أو التلقائي</Text></View><IconSymbol name="settings" size={24} color={colors.primary} /></View>
+      <View style={styles.typeRow}>
+        {([['light', 'الوضع النهاري'], ['dark', 'الوضع الليلي'], ['system', 'تلقائي حسب الجهاز']] as [ThemeMode, string][]).map(([mode, label]) => (
+          <Pressable key={mode} onPress={() => setAppThemeMode(mode)} style={[styles.typeOption, { flex: 1, borderColor: themeMode === mode ? colors.primary : colors.border, backgroundColor: themeMode === mode ? (mode === 'dark' ? '#24415A' : '#DDF6F7') : colors.background }]}>
+            <Text style={[styles.typeOptionText, { color: themeMode === mode ? colors.primary : colors.foreground }]}>{label}</Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
     <View style={[styles.unifiedCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.cardHeader}><Pressable onPress={openNewBrand} style={[styles.addButton, { backgroundColor: '#2563EB' }]}><IconSymbol name="plus" size={18} color="#FFF" /><Text style={styles.addButtonText}>إضافة ماركة</Text></Pressable><View><Text style={[styles.sectionTitle, { color: colors.foreground }]}>الماركات والموديلات</Text><Text style={[styles.sectionHint, { color: colors.muted }]}>{managedBrands.length} ماركة محفوظة</Text></View></View>
       <Pressable onPress={() => setBrandListOpen((x) => !x)} style={[styles.dropdownToggle, { borderColor: colors.border, backgroundColor: colors.background }]}><IconSymbol name={brandListOpen ? 'chevron.down' : 'chevron.right'} size={20} color="#2563EB" /><View style={styles.toggleCopy}><Text style={[styles.toggleTitle, { color: colors.foreground }]}>{brandListOpen ? 'إخفاء الماركات والموديلات' : 'عرض الماركات والموديلات'}</Text><Text style={[styles.toggleHint, { color: colors.muted }]}>إضافة وتعديل وحذف من داخل القائمة</Text></View></Pressable>
