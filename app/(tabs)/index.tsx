@@ -79,6 +79,13 @@ const quickActions = [
     route: "/pipe-diameters",
   },
   {
+    title: "قياس قطر الماسورة بالكاميرا",
+    subtitle: "مرجع معروف ومؤشرات يدوية",
+    icon: "settings" as const,
+    tone: "#0891B2",
+    route: "/pipe-measure",
+  },
+  {
     title: "دليل الضغوط والأمبير",
     subtitle: "R22 وR410A",
     icon: "bolt.fill" as const,
@@ -262,12 +269,16 @@ export default function HomeScreen() {
         }
         renderItem={({ item }) => (
           <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/[section]",
-                params: { section: item.route.replace("/", "") },
-              } as any)
-            }
+            onPress={() => {
+              if (item.route === "/pipe-measure") {
+                router.push("/pipe-measure");
+              } else {
+                router.push({
+                  pathname: "/[section]",
+                  params: { section: item.route.replace("/", "") },
+                } as any);
+              }
+            }}
             style={({ pressed }) => [
               styles.actionCard,
               { backgroundColor: colors.surface, borderColor: colors.border },
