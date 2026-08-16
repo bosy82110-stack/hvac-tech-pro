@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Image,
+  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -419,6 +420,8 @@ export default function SectionScreen() {
   const [simulatorSelectedId, setSimulatorSelectedId] = useState<string | null>(null);
   const [simulatorSelectedTerminal, setSimulatorSelectedTerminal] = useState<string | null>(null);
   const [simulatorCanvasWidth, setSimulatorCanvasWidth] = useState(0);
+  const [simulatorDragStart, setSimulatorDragStart] = useState<string | null>(null);
+  const [simulatorDragPoint, setSimulatorDragPoint] = useState<{ x: number; y: number } | null>(null);
   const [simulatorRunning, setSimulatorRunning] = useState(false);
   const [simulatorMessage, setSimulatorMessage] = useState("أضف المكونات ثم اضغط على مكوّنين لعمل توصيل.");
   const [input, setInput] = useState("");
@@ -747,6 +750,59 @@ export default function SectionScreen() {
                 const [px, py] = positions[label] ?? [0.5, 0.5];
                 return { x: box.left + box.width * px, y: box.top + box.height * py };
               };
+              const nearestTerminal = (point: { x: number; y: number }) => {
+                let closestId: string | null = null;
+                let closestDistance = 38;
+                simulatorParts.forEach((part) => part.terminalLabels.forEach((_, terminalIndex) => {
+                  const id = `${part.id}:${terminalIndex}`;
+                  const target = terminalPoint(id);
+                  if (!target) return;
+                  const distance = Math.hypot(target.x - point.x, target.y - point.y);
+                  if (distance <= closestDistance) {
+                    closestId = id;
+                    closestDistance = distance;
+                  }
+                }));
+                return closestId;
+              };
+              const completeDragConnection = (start: string, end: string | null) => {
+                if (!end || start === end) return;
+                const [firstPartId] = start.split(":");
+                const [secondPartId] = end.split(":");
+                if (firstPartId === secondPartId) {
+                  setSimulatorMessage("لا يمكن توصيل طرفين من نفس المكوّن.");
+                  return;
+                }
+                const exists = simulatorConnections.some(([a, b]) => (a === start && b === end) || (a === end && b === start));
+                if (!exists) setSimulatorConnections((previous) => [...previous, [start, end]]);
+                setSimulatorSelectedTerminal(null);
+                setSimulatorSelectedId(null);
+                setSimulatorRunning(false);
+                setSimulatorMessage("تم سحب السلك وتوصيله بين الطرفين. أكمل الدائرة ثم اضغط تشغيل.");
+              };
+              const createTerminalResponder = (terminalId: string) => PanResponder.create({
+                onStartShouldSetPanResponder: () => true,
+                onMoveShouldSetPanResponder: () => true,
+                onPanResponderGrant: () => {
+                  setSimulatorDragStart(terminalId);
+                  setSimulatorDragPoint(terminalPoint(terminalId));
+                },
+                onPanResponderMove: (_, gesture) => {
+                  const start = terminalPoint(terminalId);
+                  if (start) setSimulatorDragPoint({ x: start.x + gesture.dx, y: start.y + gesture.dy });
+                },
+                onPanResponderRelease: (_, gesture) => {
+                  const start = terminalPoint(terminalId);
+                  const endPoint = start ? { x: start.x + gesture.dx, y: start.y + gesture.dy } : null;
+                  completeDragConnection(terminalId, endPoint ? nearestTerminal(endPoint) : null);
+                  setSimulatorDragStart(null);
+                  setSimulatorDragPoint(null);
+                },
+                onPanResponderTerminate: () => {
+                  setSimulatorDragStart(null);
+                  setSimulatorDragPoint(null);
+                },
+              });
               return (
                 <View style={styles.simulatorCanvas} onLayout={(event) => setSimulatorCanvasWidth(event.nativeEvent.layout.width)}>
                   <View style={styles.simulatorGridLayer} pointerEvents="none" />
@@ -758,6 +814,10 @@ export default function SectionScreen() {
                       const wireColors = ["#2563EB", "#DC2626", "#F59E0B", "#16A34A", "#7C3AED"];
                       return <Line key={`${first}-${second}-${index}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={wireColors[index % wireColors.length]} strokeWidth={5} strokeLinecap="round" />;
                     })}
+                    {simulatorDragStart && simulatorDragPoint && (() => {
+                      const start = terminalPoint(simulatorDragStart);
+                      return start ? <Line x1={start.x} y1={start.y} x2={simulatorDragPoint.x} y2={simulatorDragPoint.y} stroke="#F59E0B" strokeWidth={6} strokeLinecap="round" strokeDasharray="10 7" /> : null;
+                    })()}
                   </Svg>
                   {simulatorParts.map((part, index) => {
                     const box = geometryFor(part, index);
@@ -774,7 +834,7 @@ export default function SectionScreen() {
                           const position: Record<string, [number, number]> = { C: [0.25, 0.22], R: [0.5, 0.18], S: [0.75, 0.22], L1: [0.2, 0.2], T1: [0.5, 0.2], A1: [0.8, 0.78], IN: [0.25, 0.2], OUT: [0.75, 0.2], L: [0.25, 0.5], T: [0.75, 0.5], Y: [0.75, 0.78], R1: [0.25, 0.78], N: [0.75, 0.5], "24V": [0.25, 0.78], COM: [0.75, 0.78] };
                           const [px, py] = position[terminal.label] ?? [0.5, 0.5];
                           const roleColor = terminal.role === "power" ? "#2563EB" : terminal.role === "control" ? "#7C3AED" : "#DC2626";
-                          return <Pressable key={terminalId} onPressIn={() => selectSimulatorTerminal(part.id, terminalIndex)} style={[styles.simulatorRealTerminal, { left: `${px * 100}%`, top: `${py * 100}%`, borderColor: selected ? "#FFFFFF" : roleColor, backgroundColor: selected ? "#DC2626" : "#EF4444" }]}><Text style={styles.simulatorRealTerminalText}>{terminal.label}</Text></Pressable>;
+                          return <Pressable key={terminalId} {...createTerminalResponder(terminalId).panHandlers} onPress={() => selectSimulatorTerminal(part.id, terminalIndex)} style={[styles.simulatorRealTerminal, { left: `${px * 100}%`, top: `${py * 100}%`, borderColor: selected ? "#FFFFFF" : roleColor, backgroundColor: selected ? "#DC2626" : "#EF4444" }]}><Text style={styles.simulatorRealTerminalText}>{terminal.label}</Text></Pressable>;
                         })}
                       </View>
                     );
