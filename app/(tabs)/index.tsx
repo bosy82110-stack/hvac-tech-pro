@@ -304,23 +304,7 @@ export default function HomeScreen() {
                 <Text style={styles.aiButtonText}>ابدأ</Text>
               </Pressable>
             </View>
-            <Pressable
-              onPress={() => router.push("/settings")}
-              style={({ pressed }) => [
-                styles.settingsFooterCard,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-                pressed && styles.pressed,
-              ]}
-            >
-              <View style={[styles.settingsFooterIcon, { backgroundColor: "#64748B" }]}>
-                <IconSymbol name="settings" size={22} color="#FFFFFF" />
-              </View>
-              <View style={styles.aiCopy}>
-                <Text style={[styles.settingsFooterTitle, { color: colors.foreground }]}>الإعدادات</Text>
-                <Text style={[styles.settingsFooterText, { color: colors.muted }]}>إدارة البيانات والتخصيص</Text>
-              </View>
-              <IconSymbol name="chevron.right" size={20} color={colors.muted} />
-            </Pressable>
+            
           </View>
         }
       />
@@ -472,23 +456,4 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   aiButtonText: { color: "#0B1F33", fontSize: 12, fontWeight: "800" },
-  settingsFooterCard: {
-    minHeight: 70,
-    marginTop: 12,
-    borderRadius: 18,
-    borderWidth: 1,
-    padding: 12,
-    flexDirection: "row-reverse",
-    alignItems: "center",
-    gap: 10,
-  },
-  settingsFooterIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  settingsFooterTitle: { fontSize: 14, fontWeight: "800", textAlign: "right" },
-  settingsFooterText: { fontSize: 11, marginTop: 4, textAlign: "right" },
 });
