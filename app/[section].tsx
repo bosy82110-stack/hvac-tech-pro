@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import Svg, { Line } from "react-native-svg";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -64,6 +65,26 @@ const simulatorPartCatalog: Array<{ type: SimulatorPartType; name: string; termi
   { type: "transformer", name: "ترانس", terminals: 4, terminalLabels: [{ label: "L", role: "power" }, { label: "N", role: "power" }, { label: "24V", role: "control" }, { label: "COM", role: "control" }], color: "#475569" },
 ];
 const simulatorCommonOrder: SimulatorPartType[] = ["breaker1", "fuse", "switch", "thermostat", "highPressure", "lowPressure", "contactor", "overload", "compressor"];
+const simulatorAssetMap: Partial<Record<SimulatorPartType, ReturnType<typeof require>>> = {
+  compressor: require("../assets/simulator/compressor-crs.jpg"),
+  contactor: require("../assets/simulator/contactor-3terminals.jpg"),
+  overload: require("../assets/simulator/overload.jpg"),
+  thermostat: require("../assets/simulator/thermostat-pressure.jpg"),
+  highPressure: require("../assets/simulator/thermostat-pressure.jpg"),
+  lowPressure: require("../assets/simulator/thermostat-pressure.jpg"),
+};
+const simulatorNodeLayout: Partial<Record<SimulatorPartType, { x: number; y: number; w: number; h: number }>> = {
+  breaker1: { x: 0.04, y: 0.06, w: 0.18, h: 0.14 },
+  fuse: { x: 0.27, y: 0.06, w: 0.18, h: 0.14 },
+  contactor: { x: 0.56, y: 0.04, w: 0.34, h: 0.25 },
+  thermostat: { x: 0.05, y: 0.31, w: 0.22, h: 0.23 },
+  highPressure: { x: 0.33, y: 0.31, w: 0.18, h: 0.18 },
+  lowPressure: { x: 0.33, y: 0.53, w: 0.18, h: 0.18 },
+  overload: { x: 0.07, y: 0.68, w: 0.20, h: 0.20 },
+  compressor: { x: 0.54, y: 0.56, w: 0.34, h: 0.29 },
+  switch: { x: 0.05, y: 0.56, w: 0.18, h: 0.14 },
+  transformer: { x: 0.76, y: 0.31, w: 0.18, h: 0.18 },
+};
 const calculatorOptions: Record<string, string[]> = {
   التبريد: ["السعة التبريدية"],
   الطول: ["الطول"],
@@ -397,6 +418,7 @@ export default function SectionScreen() {
   const [simulatorConnections, setSimulatorConnections] = useState<Array<[string, string]>>([]);
   const [simulatorSelectedId, setSimulatorSelectedId] = useState<string | null>(null);
   const [simulatorSelectedTerminal, setSimulatorSelectedTerminal] = useState<string | null>(null);
+  const [simulatorCanvasWidth, setSimulatorCanvasWidth] = useState(0);
   const [simulatorRunning, setSimulatorRunning] = useState(false);
   const [simulatorMessage, setSimulatorMessage] = useState("أضف المكونات ثم اضغط على مكوّنين لعمل توصيل.");
   const [input, setInput] = useState("");
@@ -700,39 +722,67 @@ export default function SectionScreen() {
             </View>
             {simulatorParts.length === 0 ? (
               <Text style={[styles.simulatorEmpty, { color: colors.muted }]}>لم تتم إضافة مكونات بعد.</Text>
-            ) : simulatorParts.map((part, index) => {
-              const catalog = simulatorPartCatalog.find((item) => item.type === part.type);
-              const isSelected = simulatorSelectedId === part.id;
-              const links = simulatorConnections.filter(([a, b]) => a.startsWith(`${part.id}:`) || b.startsWith(`${part.id}:`)).length;
+            ) : (() => {
+              const canvasHeight = 455;
+              const width = simulatorCanvasWidth || 360;
+              const geometryFor = (part: SimulatorPart, index: number) => {
+                const base = simulatorNodeLayout[part.type] ?? { x: 0.08, y: 0.08 + index * 0.08, w: 0.22, h: 0.16 };
+                return { left: base.x * width, top: base.y * canvasHeight, width: base.w * width, height: base.h * canvasHeight };
+              };
+              const terminalPoint = (terminalId: string) => {
+                const [partId, rawIndex] = terminalId.split(":");
+                const partIndex = simulatorParts.findIndex((item) => item.id === partId);
+                const part = simulatorParts[partIndex];
+                if (!part) return null;
+                const box = geometryFor(part, partIndex);
+                const index = Number(rawIndex);
+                const label = part.terminalLabels[index]?.label ?? "";
+                const positions: Record<string, [number, number]> = {
+                  C: [0.25, 0.22], R: [0.5, 0.18], S: [0.75, 0.22],
+                  L1: [0.2, 0.2], T1: [0.5, 0.2], A1: [0.8, 0.78],
+                  IN: [0.25, 0.2], OUT: [0.75, 0.2],
+                  L: [0.25, 0.5], T: [0.75, 0.5], Y: [0.75, 0.78], R1: [0.25, 0.78],
+                  N: [0.75, 0.5], "24V": [0.25, 0.78], COM: [0.75, 0.78],
+                };
+                const [px, py] = positions[label] ?? [0.5, 0.5];
+                return { x: box.left + box.width * px, y: box.top + box.height * py };
+              };
               return (
-                <View key={part.id} style={[styles.simulatorRealPart, { borderColor: isSelected ? "#DC2626" : colors.border, backgroundColor: colors.background }]}>
-                  <View style={styles.simulatorRealPartHeader}>
-                    <View style={[styles.simulatorComponentGraphic, { borderColor: catalog?.color ?? colors.primary, backgroundColor: `${catalog?.color ?? colors.primary}18` }]}>
-                      <View style={[styles.simulatorGraphicCore, { backgroundColor: catalog?.color ?? colors.primary }]} />
-                      <View style={[styles.simulatorGraphicLine, { backgroundColor: catalog?.color ?? colors.primary }]} />
-                    </View>
-                    <View style={styles.simulatorRealPartCopy}>
-                      <Text style={[styles.simulatorPartName, { color: colors.foreground }]}>{index + 1}. {part.name}</Text>
-                      <Text style={[styles.simulatorLinkCount, { color: colors.muted }]}>{links} توصيل</Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.simulatorTerminalHint, { color: colors.muted }]}>اضغط على الطرف المطلوب ثم طرف مكوّن آخر لإنشاء سلك</Text>
-                  <View style={styles.simulatorTerminalRow}>
-                    {part.terminalLabels.map((terminal, terminalIndex) => {
-                      const terminalId = `${part.id}:${terminalIndex}`;
-                      const selected = simulatorSelectedTerminal === terminalId;
-                      const roleColor = terminal.role === "power" ? "#2563EB" : terminal.role === "control" ? "#7C3AED" : "#16A34A";
-                      return (
-                        <Pressable key={terminalId} onPress={() => selectSimulatorTerminal(part.id, terminalIndex)} style={({ pressed }) => [styles.simulatorTerminal, { borderColor: selected ? "#DC2626" : roleColor, backgroundColor: selected ? "#FEE2E2" : `${roleColor}14` }, pressed && { opacity: 0.7 }]}>
-                          <View style={[styles.simulatorTerminalDot, { backgroundColor: roleColor }]} />
-                          <Text style={[styles.simulatorTerminalText, { color: colors.foreground }]}>{terminal.label}</Text>
-                        </Pressable>
-                      );
+                <View style={styles.simulatorCanvas} onLayout={(event) => setSimulatorCanvasWidth(event.nativeEvent.layout.width)}>
+                  <View style={styles.simulatorGridLayer} pointerEvents="none" />
+                  <Svg width={width} height={canvasHeight} style={StyleSheet.absoluteFill} pointerEvents="none">
+                    {simulatorConnections.map(([first, second], index) => {
+                      const a = terminalPoint(first);
+                      const b = terminalPoint(second);
+                      if (!a || !b) return null;
+                      const wireColors = ["#2563EB", "#DC2626", "#F59E0B", "#16A34A", "#7C3AED"];
+                      return <Line key={`${first}-${second}-${index}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={wireColors[index % wireColors.length]} strokeWidth={5} strokeLinecap="round" />;
                     })}
-                  </View>
+                  </Svg>
+                  {simulatorParts.map((part, index) => {
+                    const box = geometryFor(part, index);
+                    const catalog = simulatorPartCatalog.find((item) => item.type === part.type);
+                    const asset = simulatorAssetMap[part.type];
+                    const isSelected = simulatorSelectedId === part.id;
+                    return (
+                      <View key={part.id} style={[styles.simulatorNode, { left: box.left, top: box.top, width: box.width, height: box.height, borderColor: isSelected ? "#DC2626" : `${catalog?.color ?? colors.primary}70` }]}>
+                        {asset ? <Image source={asset} resizeMode="contain" style={styles.simulatorNodeImage} /> : <View style={[styles.simulatorFallbackImage, { backgroundColor: `${catalog?.color ?? colors.primary}22` }]}><Text style={[styles.simulatorFallbackText, { color: catalog?.color ?? colors.primary }]}>{part.name}</Text></View>}
+                        <Text style={styles.simulatorNodeCaption}>{part.name}</Text>
+                        {part.terminalLabels.map((terminal, terminalIndex) => {
+                          const terminalId = `${part.id}:${terminalIndex}`;
+                          const selected = simulatorSelectedTerminal === terminalId;
+                          const position: Record<string, [number, number]> = { C: [0.25, 0.22], R: [0.5, 0.18], S: [0.75, 0.22], L1: [0.2, 0.2], T1: [0.5, 0.2], A1: [0.8, 0.78], IN: [0.25, 0.2], OUT: [0.75, 0.2], L: [0.25, 0.5], T: [0.75, 0.5], Y: [0.75, 0.78], R1: [0.25, 0.78], N: [0.75, 0.5], "24V": [0.25, 0.78], COM: [0.75, 0.78] };
+                          const [px, py] = position[terminal.label] ?? [0.5, 0.5];
+                          const roleColor = terminal.role === "power" ? "#2563EB" : terminal.role === "control" ? "#7C3AED" : "#DC2626";
+                          return <Pressable key={terminalId} onPressIn={() => selectSimulatorTerminal(part.id, terminalIndex)} style={[styles.simulatorRealTerminal, { left: `${px * 100}%`, top: `${py * 100}%`, borderColor: selected ? "#FFFFFF" : roleColor, backgroundColor: selected ? "#DC2626" : "#EF4444" }]}><Text style={styles.simulatorRealTerminalText}>{terminal.label}</Text></Pressable>;
+                        })}
+                      </View>
+                    );
+                  })}
+                  <View style={styles.simulatorPowerLabel}><Text style={styles.simulatorPowerLabelText}>Power / Control</Text></View>
                 </View>
               );
-            })}
+            })()}
             <Text style={[styles.simulatorHint, { color: colors.muted }]}>{simulatorSelectedTerminal ? "تم اختيار طرف. اختر طرفًا من مكوّن آخر لإكمال السلك." : "اضغط على أطراف المكونات لإنشاء أسلاك واقعية."}</Text>
             {simulatorConnections.length > 0 && <Text style={[styles.simulatorConnections, { color: colors.muted }]}>عدد الأسلاك: {simulatorConnections.length}</Text>}
           </View>
@@ -789,7 +839,7 @@ export default function SectionScreen() {
                       }}
                     >
                       <Image
-                        source={require("@/assets/images/refrigeration-cycle.png")}
+                        source={require("@/assets/images/refrigeration-cycle.jpg")}
                         resizeMode="contain"
                         style={{
                           width: 520 * circuitZoom,
@@ -3870,6 +3920,17 @@ const styles = StyleSheet.create({
   simulatorCatalogText: { flex: 1, fontSize: 13, fontWeight: "800", textAlign: "right" },
   simulatorAddText: { fontSize: 24, fontWeight: "900", lineHeight: 26 },
   simulatorBoard: { borderWidth: 1, borderRadius: 16, padding: 12, marginTop: 14 },
+  simulatorCanvas: { height: 455, borderRadius: 14, overflow: "hidden", backgroundColor: "#F8FAFC", position: "relative", marginTop: 10 },
+  simulatorGridLayer: { ...StyleSheet.absoluteFillObject, opacity: 0.35, backgroundColor: "#E2E8F0" },
+  simulatorNode: { position: "absolute", borderWidth: 2, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.88)", overflow: "visible" },
+  simulatorNodeImage: { width: "100%", height: "100%", borderRadius: 8 },
+  simulatorFallbackImage: { flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 8 },
+  simulatorFallbackText: { fontSize: 10, fontWeight: "900", textAlign: "center" },
+  simulatorNodeCaption: { position: "absolute", bottom: -18, left: 0, right: 0, textAlign: "center", fontSize: 9, fontWeight: "900", color: "#0F172A" },
+  simulatorRealTerminal: { position: "absolute", width: 28, height: 28, marginLeft: -14, marginTop: -14, borderWidth: 2, borderRadius: 14, alignItems: "center", justifyContent: "center", zIndex: 5, elevation: 5 },
+  simulatorRealTerminalText: { color: "#FFFFFF", fontSize: 8, fontWeight: "900" },
+  simulatorPowerLabel: { position: "absolute", top: 8, right: 8, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: "rgba(15,23,42,0.72)" },
+  simulatorPowerLabelText: { color: "#FFFFFF", fontSize: 9, fontWeight: "900" },
   simulatorBoardHeader: { flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between" },
   simulatorClearText: { fontSize: 12, fontWeight: "900" },
   simulatorEmpty: { fontSize: 13, textAlign: "center", paddingVertical: 24 },
