@@ -839,7 +839,7 @@ export default function SectionScreen() {
                       }}
                     >
                       <Image
-                        source={require("@/assets/images/refrigeration-cycle.jpg")}
+                        source={require("@/assets/images/refrigeration-cycle.png")}
                         resizeMode="contain"
                         style={{
                           width: 520 * circuitZoom,
