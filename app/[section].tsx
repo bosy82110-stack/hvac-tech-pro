@@ -48,6 +48,21 @@ const compressorWorkbookGuidance = [
   "الملف الأصلي قابل للتحديث، وهذه البيانات مرجع مساعد وليست بديلًا عن تعليمات الشركة المصنعة.",
 ];
 
+type SimulatorPartType = "breaker1" | "fuse" | "switch" | "thermostat" | "highPressure" | "lowPressure" | "contactor" | "overload" | "compressor" | "transformer";
+type SimulatorPart = { id: string; type: SimulatorPartType; name: string; terminals: number };
+const simulatorPartCatalog: Array<{ type: SimulatorPartType; name: string; terminals: number; color: string }> = [
+  { type: "breaker1", name: "قاطع 1 فاز", terminals: 2, color: "#2563EB" },
+  { type: "fuse", name: "فيوز", terminals: 2, color: "#F59E0B" },
+  { type: "switch", name: "مفتاح ON/OFF", terminals: 2, color: "#64748B" },
+  { type: "thermostat", name: "ثرموستات", terminals: 2, color: "#0E7490" },
+  { type: "highPressure", name: "هاي برشر", terminals: 2, color: "#DC2626" },
+  { type: "lowPressure", name: "لو برشر", terminals: 2, color: "#7C3AED" },
+  { type: "contactor", name: "كونتاكتور", terminals: 4, color: "#0891B2" },
+  { type: "overload", name: "أوفرلود", terminals: 2, color: "#EA580C" },
+  { type: "compressor", name: "كباس", terminals: 3, color: "#16A34A" },
+  { type: "transformer", name: "ترانس", terminals: 4, color: "#475569" },
+];
+const simulatorCommonOrder: SimulatorPartType[] = ["breaker1", "fuse", "switch", "thermostat", "highPressure", "lowPressure", "contactor", "overload", "compressor"];
 const calculatorOptions: Record<string, string[]> = {
   التبريد: ["السعة التبريدية"],
   الطول: ["الطول"],
@@ -260,6 +275,11 @@ const info: Record<string, { title: string; subtitle: string; icon: any }> = {
     subtitle: "رسومات وشرح دوائر التبريد والميكانيكا والكهرباء",
     icon: "book.fill",
   },
+  "circuit-simulator": {
+    title: "محاكي الدوائر",
+    subtitle: "كوّن دائرة كباس 1 فاز واكتشف أخطاء التوصيل",
+    icon: "bolt.fill",
+  },
   calculators: {
     title: "حاسبات HVAC",
     subtitle: "تحويلات وحسابات سريعة للفني",
@@ -372,6 +392,11 @@ export default function SectionScreen() {
   const key = Array.isArray(section) ? section[0] : section;
   const current = info[key] ?? info.search;
   const [query, setQuery] = useState("");
+  const [simulatorParts, setSimulatorParts] = useState<SimulatorPart[]>([]);
+  const [simulatorConnections, setSimulatorConnections] = useState<Array<[string, string]>>([]);
+  const [simulatorSelectedId, setSimulatorSelectedId] = useState<string | null>(null);
+  const [simulatorRunning, setSimulatorRunning] = useState(false);
+  const [simulatorMessage, setSimulatorMessage] = useState("أضف المكونات ثم اضغط على مكوّنين لعمل توصيل.");
   const [input, setInput] = useState("");
   const [calcCategory, setCalcCategory] = useState("التبريد");
   const [calcConversion, setCalcConversion] = useState("السعة التبريدية");
@@ -565,6 +590,108 @@ export default function SectionScreen() {
       : null;
   const brandList = managedBrands;
   const renderCards = () => {
+    if (key === "circuit-simulator") {
+      const addSimulatorPart = (type: SimulatorPartType) => {
+        const catalog = simulatorPartCatalog.find((item) => item.type === type);
+        if (!catalog) return;
+        const part: SimulatorPart = {
+          id: `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          type,
+          name: catalog.name,
+          terminals: catalog.terminals,
+        };
+        setSimulatorParts((previous) => [...previous, part]);
+        setSimulatorRunning(false);
+        setSimulatorMessage("تمت إضافة المكوّن. اضغط على مكوّنين لعمل توصيل.");
+      };
+      const selectSimulatorPart = (id: string) => {
+        if (!simulatorSelectedId) {
+          setSimulatorSelectedId(id);
+          return;
+        }
+        if (simulatorSelectedId === id) {
+          setSimulatorSelectedId(null);
+          return;
+        }
+        const exists = simulatorConnections.some(
+          ([a, b]) => (a === simulatorSelectedId && b === id) || (a === id && b === simulatorSelectedId),
+        );
+        if (!exists) setSimulatorConnections((previous) => [...previous, [simulatorSelectedId, id]]);
+        setSimulatorSelectedId(null);
+        setSimulatorRunning(false);
+        setSimulatorMessage("تم إنشاء التوصيل. أكمل التوصيلات ثم اضغط تشغيل.");
+      };
+      const runSimulator = () => {
+        const types = new Set(simulatorParts.map((part) => part.type));
+        const has = (type: SimulatorPartType) => types.has(type);
+        const connected = (type: SimulatorPartType) => {
+          const part = simulatorParts.find((item) => item.type === type);
+          return !!part && simulatorConnections.some(([a, b]) => a === part.id || b === part.id);
+        };
+        const errors: string[] = [];
+        if (!has("breaker1")) errors.push("أضف قاطع 1 فاز كمصدر حماية.");
+        if (!has("compressor")) errors.push("أضف كباسًا إلى الدائرة.");
+        if (!has("contactor")) errors.push("أضف كونتاكتورًا للتحكم في تشغيل الكباس.");
+        if (!has("overload")) errors.push("أضف أوفرلود لحماية الكباس.");
+        ["breaker1", "contactor", "overload", "compressor"].forEach((type) => {
+          if (has(type as SimulatorPartType) && !connected(type as SimulatorPartType)) errors.push(`المكوّن ${simulatorPartCatalog.find((item) => item.type === type)?.name ?? type} غير موصل.`);
+        });
+        setSimulatorRunning(true);
+        setSimulatorMessage(errors.length ? `الدائرة لا تعمل: ${errors.join(" ")}` : "الدائرة تعمل مبدئيًا. راجع مخطط الشركة المصنعة قبل التطبيق العملي.");
+      };
+      return (
+        <View>
+          <View style={[styles.detailCard, { backgroundColor: colors.surface, borderColor: "#DC2626" }]}>
+            <View style={[styles.circleIcon, { backgroundColor: "#FEE2E2" }]}>
+              <IconSymbol name="bolt.fill" size={24} color="#DC2626" />
+            </View>
+            <Text style={[styles.detailsTitle, { color: colors.foreground }]}>محاكي الدوائر</Text>
+            <Text style={[styles.detailsBody, { color: colors.muted }]}>الإصدار الأول: كوّن دائرة كباس 1 فاز، اختر المكونات، ثم اضغط على مكوّنين لإنشاء سلك بينهما.</Text>
+          </View>
+          <Text style={[styles.simulatorSectionTitle, { color: colors.foreground }]}>المكونات</Text>
+          <View style={styles.simulatorCatalog}>
+            {simulatorPartCatalog.map((item) => (
+              <Pressable key={item.type} onPress={() => addSimulatorPart(item.type)} style={({ pressed }) => [styles.simulatorCatalogItem, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.82 }]}>
+                <View style={[styles.simulatorColorDot, { backgroundColor: item.color }]} />
+                <Text style={[styles.simulatorCatalogText, { color: colors.foreground }]}>{item.name}</Text>
+                <Text style={[styles.simulatorAddText, { color: item.color }]}>+</Text>
+              </Pressable>
+            ))}
+          </View>
+          <View style={[styles.simulatorBoard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={styles.simulatorBoardHeader}>
+              <Text style={[styles.simulatorSectionTitle, { color: colors.foreground }]}>لوحة الدائرة</Text>
+              <Pressable onPress={() => { setSimulatorParts([]); setSimulatorConnections([]); setSimulatorSelectedId(null); setSimulatorRunning(false); setSimulatorMessage("أضف المكونات ثم اضغط على مكوّنين لعمل توصيل."); }}>
+                <Text style={[styles.simulatorClearText, { color: colors.error }]}>مسح الكل</Text>
+              </Pressable>
+            </View>
+            {simulatorParts.length === 0 ? (
+              <Text style={[styles.simulatorEmpty, { color: colors.muted }]}>لم تتم إضافة مكونات بعد.</Text>
+            ) : simulatorParts.map((part, index) => {
+              const catalog = simulatorPartCatalog.find((item) => item.type === part.type);
+              const isSelected = simulatorSelectedId === part.id;
+              const links = simulatorConnections.filter(([a, b]) => a === part.id || b === part.id).length;
+              return (
+                <Pressable key={part.id} onPress={() => selectSimulatorPart(part.id)} style={({ pressed }) => [styles.simulatorPartRow, { borderColor: isSelected ? "#DC2626" : colors.border, backgroundColor: colors.background }, pressed && { opacity: 0.82 }]}>
+                  <View style={[styles.simulatorColorDot, { backgroundColor: catalog?.color ?? colors.primary }]} />
+                  <Text style={[styles.simulatorPartName, { color: colors.foreground }]}>{index + 1}. {part.name}</Text>
+                  <Text style={[styles.simulatorLinkCount, { color: colors.muted }]}>{links} توصيل</Text>
+                </Pressable>
+              );
+            })}
+            <Text style={[styles.simulatorHint, { color: colors.muted }]}>{simulatorSelectedId ? "اختر المكوّن الثاني لإكمال السلك." : "اضغط على أي مكوّنين لإنشاء سلك بينهما."}</Text>
+            {simulatorConnections.length > 0 && <Text style={[styles.simulatorConnections, { color: colors.muted }]}>عدد الأسلاك: {simulatorConnections.length}</Text>}
+          </View>
+          <Pressable onPress={runSimulator} style={({ pressed }) => [styles.simulatorRunButton, pressed && { opacity: 0.82 }]}>
+            <IconSymbol name="bolt.fill" size={20} color="#FFFFFF" />
+            <Text style={styles.simulatorRunText}>تشغيل الدائرة</Text>
+          </Pressable>
+          <View style={[styles.simulatorResult, { backgroundColor: simulatorRunning && simulatorMessage.startsWith("الدائرة تعمل") ? "#DCFCE7" : "#FEF3C7", borderColor: simulatorRunning && simulatorMessage.startsWith("الدائرة تعمل") ? "#16A34A" : "#D97706" }]}>
+            <Text style={[styles.simulatorResultText, { color: colors.foreground }]}>{simulatorMessage}</Text>
+          </View>
+        </View>
+      );
+    }
     if (key === "circuit-reference") {
       return (
         <View>
@@ -3679,4 +3806,23 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 28,
   },
+  simulatorSectionTitle: { fontSize: 16, fontWeight: "900", textAlign: "right", marginTop: 14, marginBottom: 8 },
+  simulatorCatalog: { gap: 8 },
+  simulatorCatalogItem: { minHeight: 48, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, flexDirection: "row-reverse", alignItems: "center", gap: 8 },
+  simulatorColorDot: { width: 13, height: 13, borderRadius: 7 },
+  simulatorCatalogText: { flex: 1, fontSize: 13, fontWeight: "800", textAlign: "right" },
+  simulatorAddText: { fontSize: 24, fontWeight: "900", lineHeight: 26 },
+  simulatorBoard: { borderWidth: 1, borderRadius: 16, padding: 12, marginTop: 14 },
+  simulatorBoardHeader: { flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between" },
+  simulatorClearText: { fontSize: 12, fontWeight: "900" },
+  simulatorEmpty: { fontSize: 13, textAlign: "center", paddingVertical: 24 },
+  simulatorPartRow: { minHeight: 48, borderWidth: 1, borderRadius: 11, paddingHorizontal: 10, marginTop: 8, flexDirection: "row-reverse", alignItems: "center", gap: 8 },
+  simulatorPartName: { flex: 1, fontSize: 13, fontWeight: "900", textAlign: "right" },
+  simulatorLinkCount: { fontSize: 11, fontWeight: "700" },
+  simulatorHint: { fontSize: 11, lineHeight: 18, textAlign: "right", marginTop: 12 },
+  simulatorConnections: { fontSize: 12, fontWeight: "800", textAlign: "right", marginTop: 6 },
+  simulatorRunButton: { minHeight: 50, borderRadius: 13, backgroundColor: "#DC2626", flexDirection: "row-reverse", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 14 },
+  simulatorRunText: { color: "#FFFFFF", fontSize: 15, fontWeight: "900" },
+  simulatorResult: { borderWidth: 1, borderRadius: 13, padding: 12, marginTop: 10, marginBottom: 24 },
+  simulatorResultText: { fontSize: 12, lineHeight: 20, textAlign: "right", fontWeight: "700" },
 });

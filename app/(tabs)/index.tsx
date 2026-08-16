@@ -99,7 +99,13 @@ const quickActions = [
     tone: "#0E7490",
     route: "/pressure-amp-guide",
   },
-
+  {
+    title: "محاكي الدوائر",
+    subtitle: "كوّن دائرتك واكتشف الأخطاء",
+    icon: "bolt.fill" as const,
+    tone: "#DC2626",
+    route: "/circuit-simulator",
+  },
 ];
 
 export default function HomeScreen() {
