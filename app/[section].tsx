@@ -644,6 +644,21 @@ export default function SectionScreen() {
         setSimulatorRunning(false);
         setSimulatorMessage("تمت إضافة المكوّن. اضغط على مكوّنين لعمل توصيل.");
       };
+      const removeSimulatorPart = (partId: string) => {
+        setSimulatorParts((previous) => previous.filter((part) => part.id !== partId));
+        setSimulatorPartPositions((previous) => {
+          const next = { ...previous };
+          delete next[partId];
+          return next;
+        });
+        setSimulatorConnections((previous) => previous.filter(([first, second]) => !first.startsWith(`${partId}:`) && !second.startsWith(`${partId}:`)));
+        setSimulatorSelectedId((current) => current === partId ? null : current);
+        setSimulatorSelectedTerminal((current) => current?.startsWith(`${partId}:`) ? null : current);
+        setSimulatorDragStart((current) => current?.startsWith(`${partId}:`) ? null : current);
+        setSimulatorDragPoint(null);
+        setSimulatorRunning(false);
+        setSimulatorMessage("تم حذف المكوّن والأسلاك المرتبطة به.");
+      };
       const selectSimulatorTerminal = (partId: string, terminalIndex: number) => {
         const terminalId = `${partId}:${terminalIndex}`;
         setSimulatorSelectedId(partId);
@@ -858,7 +873,7 @@ export default function SectionScreen() {
                 <View style={styles.simulatorCanvas} onLayout={(event) => setSimulatorCanvasWidth(event.nativeEvent.layout.width)}>
                   <View style={styles.simulatorGridLayer} pointerEvents="none" />
                   <Svg width={width} height={canvasHeight} style={StyleSheet.absoluteFill} pointerEvents="none">
-                    {simulatorConnections.map(([first, second], index) => {
+                    {simulatorConnections.filter(([first, second]) => simulatorParts.some((part) => first.startsWith(`${part.id}:`)) && simulatorParts.some((part) => second.startsWith(`${part.id}:`))).map(([first, second], index) => {
                       const a = terminalPoint(first);
                       const b = terminalPoint(second);
                       if (!a || !b) return null;
@@ -878,6 +893,9 @@ export default function SectionScreen() {
                     const isSelected = simulatorSelectedId === part.id;
                     return (
                       <View key={part.id} {...nodeResponder.panHandlers} style={[styles.simulatorNode, { left: box.left, top: box.top, width: box.width, height: box.height, borderColor: isSelected ? "#DC2626" : `${catalog?.color ?? colors.primary}70` }]}>
+                        <Pressable onPress={() => removeSimulatorPart(part.id)} style={styles.simulatorDeleteButton} hitSlop={8}>
+                          <Text style={styles.simulatorDeleteButtonText}>حذف</Text>
+                        </Pressable>
                         {asset ? <Image source={asset} resizeMode="contain" style={styles.simulatorNodeImage} /> : <View style={[styles.simulatorFallbackImage, { backgroundColor: `${catalog?.color ?? colors.primary}22` }]}><Text style={[styles.simulatorFallbackText, { color: catalog?.color ?? colors.primary }]}>{part.name}</Text></View>}
                         <Text style={styles.simulatorNodeCaption}>{part.name}</Text>
                         {part.terminalLabels.map((terminal, terminalIndex) => {
@@ -4043,6 +4061,8 @@ const styles = StyleSheet.create({
   simulatorFallbackImage: { flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 8 },
   simulatorFallbackText: { fontSize: 10, fontWeight: "900", textAlign: "center" },
   simulatorNodeCaption: { position: "absolute", bottom: -18, left: 0, right: 0, textAlign: "center", fontSize: 9, fontWeight: "900", color: "#0F172A" },
+  simulatorDeleteButton: { position: "absolute", top: 3, right: 3, zIndex: 20, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 6, backgroundColor: "#DC2626" },
+  simulatorDeleteButtonText: { color: "#FFFFFF", fontSize: 8, fontWeight: "900" },
   simulatorRealTerminal: { position: "absolute", width: 28, height: 28, marginLeft: -14, marginTop: -14, borderWidth: 2, borderRadius: 14, alignItems: "center", justifyContent: "center", zIndex: 5, elevation: 5 },
   simulatorRealTerminalText: { color: "#FFFFFF", fontSize: 8, fontWeight: "900" },
   simulatorPowerLabel: { position: "absolute", top: 8, right: 8, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: "rgba(15,23,42,0.72)" },
