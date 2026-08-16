@@ -717,31 +717,33 @@ export default function SectionScreen() {
                 { backgroundColor: "#F8FAFC", borderColor: colors.border },
               ]}
             >
-              <ScrollView
-                horizontal
-                nestedScrollEnabled
-                showsHorizontalScrollIndicator
-                contentContainerStyle={styles.imageScroller}
-              >
-                <ScrollView
-                  nestedScrollEnabled
-                  showsVerticalScrollIndicator
-                  contentContainerStyle={styles.imageVerticalScroller}
-                  style={{
-                    width: Math.max(520, 520 * circuitZoom),
-                    height: 300,
-                  }}
-                >
-                  <Image
-                    source={require("@/assets/images/refrigeration-cycle.png")}
-                    resizeMode="contain"
-                    style={{
-                      width: 520 * circuitZoom,
-                      height: 347 * circuitZoom,
-                    }}
-                  />
-                </ScrollView>
-              </ScrollView>
+                  <ScrollView
+                    horizontal
+                    nestedScrollEnabled
+                    directionalLockEnabled={false}
+                    showsHorizontalScrollIndicator
+                    contentContainerStyle={styles.imageScroller}
+                  >
+                    <ScrollView
+                      nestedScrollEnabled
+                      directionalLockEnabled={false}
+                      showsVerticalScrollIndicator
+                      contentContainerStyle={styles.imageVerticalScroller}
+                      style={{
+                        width: Math.max(520, 520 * circuitZoom),
+                        height: 300,
+                      }}
+                    >
+                      <Image
+                        source={require("@/assets/images/refrigeration-cycle.png")}
+                        resizeMode="contain"
+                        style={{
+                          width: 520 * circuitZoom,
+                          height: Math.round((520 / 1.5) * circuitZoom),
+                        }}
+                      />
+                    </ScrollView>
+                  </ScrollView>
             </View>
             <View style={styles.zoomRow}>
               <Pressable
@@ -755,7 +757,7 @@ export default function SectionScreen() {
                 <Text style={styles.zoomButtonText}>+</Text>
               </Pressable>
               <Text style={[styles.zoomLabel, { color: colors.muted }]}>
-                تكبير الصورة: {Math.round(circuitZoom * 100)}%
+                اسحب الصورة لرؤية الحواف • التكبير: {Math.round(circuitZoom * 100)}%
               </Text>
               <Pressable
                 onPress={() =>
@@ -3567,13 +3569,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   imageScroller: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
     paddingHorizontal: 8,
+    minWidth: "100%",
   },
   imageVerticalScroller: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
     minHeight: 300,
   },
   zoomRow: {
