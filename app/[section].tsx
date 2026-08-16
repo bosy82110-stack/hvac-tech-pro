@@ -424,6 +424,7 @@ export default function SectionScreen() {
   const current = info[key] ?? info.search;
   const [query, setQuery] = useState("");
   const [simulatorParts, setSimulatorParts] = useState<SimulatorPart[]>([]);
+  const [simulatorPartPositions, setSimulatorPartPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [simulatorCatalogOpen, setSimulatorCatalogOpen] = useState(false);
   const [simulatorConnections, setSimulatorConnections] = useState<Array<[string, string]>>([]);
   const [simulatorSelectedId, setSimulatorSelectedId] = useState<string | null>(null);
@@ -637,6 +638,8 @@ export default function SectionScreen() {
           terminals: catalog.terminals,
           terminalLabels: catalog.terminalLabels,
         };
+        const defaultPosition = simulatorNodeLayout[type] ?? { x: 0.08, y: 0.08, w: 0.22, h: 0.16 };
+        setSimulatorPartPositions((previous) => ({ ...previous, [part.id]: { x: defaultPosition.x, y: defaultPosition.y } }));
         setSimulatorParts((previous) => [...previous, part]);
         setSimulatorRunning(false);
         setSimulatorMessage("تمت إضافة المكوّن. اضغط على مكوّنين لعمل توصيل.");
@@ -751,7 +754,7 @@ export default function SectionScreen() {
           <View style={[styles.simulatorBoard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.simulatorBoardHeader}>
               <Text style={[styles.simulatorSectionTitle, { color: colors.foreground }]}>لوحة الدائرة</Text>
-              <Pressable onPress={() => {           setSimulatorParts([]); setSimulatorConnections([]); setSimulatorSelectedId(null); setSimulatorSelectedTerminal(null); setSimulatorRunning(false); setSimulatorMessage("أضف المكونات ثم اضغط على مكوّنين لعمل توصيل."); }}>
+              <Pressable onPress={() => {           setSimulatorParts([]); setSimulatorPartPositions({}); setSimulatorConnections([]); setSimulatorSelectedId(null); setSimulatorSelectedTerminal(null); setSimulatorRunning(false); setSimulatorMessage("أضف المكونات ثم اضغط على مكوّنين لعمل توصيل."); }}>
                 <Text style={[styles.simulatorClearText, { color: colors.error }]}>مسح الكل</Text>
               </Pressable>
             </View>
@@ -762,7 +765,8 @@ export default function SectionScreen() {
               const width = simulatorCanvasWidth || 360;
               const geometryFor = (part: SimulatorPart, index: number) => {
                 const base = simulatorNodeLayout[part.type] ?? { x: 0.08, y: 0.08 + index * 0.08, w: 0.22, h: 0.16 };
-                return { left: base.x * width, top: base.y * canvasHeight, width: base.w * width, height: base.h * canvasHeight };
+                const position = simulatorPartPositions[part.id] ?? { x: base.x, y: base.y };
+                return { left: position.x * width, top: position.y * canvasHeight, width: base.w * width, height: base.h * canvasHeight };
               };
               const terminalPoint = (terminalId: string) => {
                 const [partId, rawIndex] = terminalId.split(":");
@@ -812,6 +816,21 @@ export default function SectionScreen() {
                 setSimulatorRunning(false);
                 setSimulatorMessage("تم سحب السلك وتوصيله بين الطرفين. أكمل الدائرة ثم اضغط تشغيل.");
               };
+              const createNodeResponder = (part: SimulatorPart, index: number) => {
+                const base = simulatorNodeLayout[part.type] ?? { x: 0.08, y: 0.08 + index * 0.08, w: 0.22, h: 0.16 };
+                const currentPosition = simulatorPartPositions[part.id] ?? { x: base.x, y: base.y };
+                return PanResponder.create({
+                  onStartShouldSetPanResponder: () => true,
+                  onMoveShouldSetPanResponder: () => true,
+                  onPanResponderMove: (_, gesture) => {
+                    const nextX = Math.max(0, Math.min(1 - base.w, currentPosition.x + gesture.dx / width));
+                    const nextY = Math.max(0, Math.min(1 - base.h, currentPosition.y + gesture.dy / canvasHeight));
+                    setSimulatorPartPositions((previous) => ({ ...previous, [part.id]: { x: nextX, y: nextY } }));
+                    setSimulatorRunning(false);
+                  },
+                  onPanResponderRelease: () => setSimulatorMessage("تم تحريك المكوّن. يمكنك الآن توصيل أطرافه أو تشغيل الدائرة."),
+                });
+              };
               const createTerminalResponder = (terminalId: string) => PanResponder.create({
                 onStartShouldSetPanResponder: () => true,
                 onMoveShouldSetPanResponder: () => true,
@@ -853,11 +872,12 @@ export default function SectionScreen() {
                   </Svg>
                   {simulatorParts.map((part, index) => {
                     const box = geometryFor(part, index);
+                    const nodeResponder = createNodeResponder(part, index);
                     const catalog = simulatorPartCatalog.find((item) => item.type === part.type);
                     const asset = simulatorAssetMap[part.type];
                     const isSelected = simulatorSelectedId === part.id;
                     return (
-                      <View key={part.id} style={[styles.simulatorNode, { left: box.left, top: box.top, width: box.width, height: box.height, borderColor: isSelected ? "#DC2626" : `${catalog?.color ?? colors.primary}70` }]}>
+                      <View key={part.id} {...nodeResponder.panHandlers} style={[styles.simulatorNode, { left: box.left, top: box.top, width: box.width, height: box.height, borderColor: isSelected ? "#DC2626" : `${catalog?.color ?? colors.primary}70` }]}>
                         {asset ? <Image source={asset} resizeMode="contain" style={styles.simulatorNodeImage} /> : <View style={[styles.simulatorFallbackImage, { backgroundColor: `${catalog?.color ?? colors.primary}22` }]}><Text style={[styles.simulatorFallbackText, { color: catalog?.color ?? colors.primary }]}>{part.name}</Text></View>}
                         <Text style={styles.simulatorNodeCaption}>{part.name}</Text>
                         {part.terminalLabels.map((terminal, terminalIndex) => {
