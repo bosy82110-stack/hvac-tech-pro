@@ -94,10 +94,17 @@ const quickActions = [
   },
   {
     title: "حاسبة PT",
-    subtitle: "بطاقة فارغة للتطوير لاحقًا",
+    subtitle: "حساب السوبرهيت والتبريد دونيًا",
     icon: "calculator" as const,
     tone: "#0E7490",
     route: "/pressure-amp-guide",
+  },
+  {
+    title: "الإعدادات",
+    subtitle: "إدارة البيانات والتخصيص",
+    icon: "settings" as const,
+    tone: "#64748B",
+    route: "/settings",
   },
 ];
 
