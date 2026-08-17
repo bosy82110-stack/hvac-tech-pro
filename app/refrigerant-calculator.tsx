@@ -75,7 +75,7 @@ export default function RefrigerantCalculatorScreen() {
   const lineLength = Math.max(0, Number(length.replace(",", ".")) || 0);
   const baseCharge = refrigerant === "R22" ? selected.r22 : refrigerant === "R410A" ? selected.r410a : selected.r410a;
   const extraPerMeter = refrigerant === "R22" ? 30 : refrigerant === "R410A" ? 15 : 15;
-  const standardLength = 5;
+  const standardLength = 3;
   const extraLength = Math.max(0, lineLength - standardLength);
   const extraCharge = extraLength * extraPerMeter;
   const totalCharge = baseCharge + extraCharge;
@@ -100,7 +100,7 @@ export default function RefrigerantCalculatorScreen() {
 
         <View style={[styles.info, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.infoTitle, { color: colors.foreground }]}>طريقة الحساب</Text>
-          <Text style={[styles.infoText, { color: colors.muted }]}>اختر الفريون والسعة، ثم اكتب طول خط السائل/الغاز بالمتر. الحاسبة تعتبر أول 5 أمتار طولًا قياسيًا، وتضيف كمية لكل متر زائد.</Text>
+          <Text style={[styles.infoText, { color: colors.muted }]}>اختر الفريون والسعة، ثم اكتب طول خط السائل/الغاز بالمتر. حسب جدول الكتالوج، تعتبر أول 3 أمتار طولًا قياسيًا، وتبدأ إضافة الكمية من المتر الرابع.</Text>
         </View>
 
         <Text style={[styles.label, { color: colors.foreground }]}>نوع الفريون</Text>
