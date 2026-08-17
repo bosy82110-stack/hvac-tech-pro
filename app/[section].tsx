@@ -458,6 +458,7 @@ export default function SectionScreen() {
     code: string;
     brand: string;
     model: string;
+    models?: string[];
     drive: string;
     roomReceiverCode?: string;
     deviceReceiverCode?: string;
@@ -537,6 +538,7 @@ export default function SectionScreen() {
     ).catch(() => undefined);
   }, [orderItems]);
   const normalizedQuery = query.trim().toLowerCase();
+  const getCustomErrorModels = (item: CustomErrorCode) => Array.from(new Set([...(item.models ?? []), ...(item.model ? [item.model] : [])].map((value) => value.trim()).filter(Boolean)));
   const getCompressorByKey = (key: string | null) =>
     key
       ? compressorModels.find(
@@ -572,7 +574,7 @@ export default function SectionScreen() {
     (x) =>
       x.type === errorDevice &&
       normalizedQuery.length > 0 &&
-      `${x.code} ${x.roomReceiverCode ?? ''} ${x.deviceReceiverCode ?? ''} ${x.brand} ${x.model} ${x.problem}`
+      `${x.code} ${x.roomReceiverCode ?? ''} ${x.deviceReceiverCode ?? ''} ${x.brand} ${getCustomErrorModels(x).join(' ')} ${x.problem}`
         .toLowerCase()
         .includes(normalizedQuery),
   );
@@ -2460,6 +2462,7 @@ export default function SectionScreen() {
         drive: item.drive,
         problem: item.title,
         solution: `${item.cause} ${item.steps.join(" ")}`,
+        models: undefined,
         type: item.type,
       }));
       const customResults = filteredCustomCodes.map((item) => ({
@@ -2467,6 +2470,7 @@ export default function SectionScreen() {
         code: item.code,
         brand: item.brand,
         model: item.model,
+        models: getCustomErrorModels(item),
         drive: item.drive,
         roomReceiverCode: item.roomReceiverCode,
         deviceReceiverCode: item.deviceReceiverCode,
@@ -2503,7 +2507,7 @@ export default function SectionScreen() {
                     {item.brand} · {item.problem}
                   </Text>
                   <Text style={[styles.cardSub, { color: colors.muted }]}>
-                    {item.model} · {item.drive} · {item.type}
+                    {item.models?.length ? item.models.join('، ') : item.model} · {item.drive} · {item.type}
                   </Text>
                   <Text style={[styles.note, { color: colors.muted }]}>
                     اضغط لعرض كل التفاصيل
@@ -2538,7 +2542,7 @@ export default function SectionScreen() {
                   الماركة: {selectedError.brand}
                 </Text>
                 <Text style={[styles.detailsRow, { color: colors.foreground }]}>
-                  الموديل: {selectedError.model}
+                  الموديلات: {selectedError.models?.length ? selectedError.models.join('، ') : selectedError.model}
                 </Text>
                 <Text style={[styles.detailsRow, { color: colors.foreground }]}>
                   نوع التشغيل: {selectedError.drive}

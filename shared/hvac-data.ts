@@ -60,6 +60,7 @@ export type CustomErrorCode = {
   code: string;
   brand: string;
   model: string;
+  models?: string[];
   drive: "عادي" | "إنفرتر";
   roomReceiverCode?: string;
   deviceReceiverCode?: string;
