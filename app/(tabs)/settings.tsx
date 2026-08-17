@@ -10,6 +10,19 @@ const DIAGNOSIS_KEY = 'hvac_custom_diagnoses';
 const ERROR_KEY = 'hvac_custom_error_codes';
 const BRANDS_KEY = 'hvac_managed_brands';
 const MATERIALS_KEY = 'hvac_custom_materials';
+const CARRIER_ROOM_RECEIVER_SEEDED_KEY = 'hvac_carrier_concealed_room_receiver_seeded_v1';
+const carrierRoomReceiverFaults = [
+  { code: 'E0', reason: 'عطل في الوحدة الخارجية' },
+  { code: 'E1', reason: 'خطأ في الاتصال بين الوحدتين الداخلية والخارجية، سقوط فازة L1 ويظهر العطل بعد 8 دقائق' },
+  { code: 'E2', reason: 'عطل في حساس الهواء الراجع إلى الوحدة الداخلية، فتح كهربائي أو قصر كهربائي' },
+  { code: 'E3', reason: 'عطل في حساس المبادِل الحراري للوحدة الداخلية، فتح كهربائي أو قصر كهربائي' },
+  { code: 'E5', reason: 'عطل في حساس الهواء الراجع أو المبادِل الحراري للوحدة الخارجية، أو حساس ارتفاع حرارة الضاغط أو قاطع الضغط العالي' },
+  { code: 'E7', reason: 'عطل في الوحدة الإلكترونية للوحدة الداخلية، عطل EEPROM' },
+  { code: 'E8', reason: 'عطل في التحكم في موتور مروحة الوحدة الداخلية' },
+  { code: 'EE', reason: 'عطل حساس طلبة تصريف مياه التكييف عند استخدام طلبة تصريف المياه الاختيارية' },
+  { code: 'EF', reason: 'وجود تنفيس بدائرة الفريون في جهاز التكييف أو وجود عطل أدى إلى إيقاف تشغيل الضاغط' },
+  { code: 'ED', reason: 'عطل في التحكم في موتور مروحة الوحدة الخارجية' },
+] as const;
 const deviceTypes: HvacDeviceType[] = ['سبليت', 'مركزي', 'غرف تبريد', 'VRF', 'كونسيلد'];
 const driveTypes: CustomErrorCode['drive'][] = ['عادي', 'إنفرتر'];
 
@@ -51,11 +64,32 @@ export default function SettingsScreen() {
   const [materialSize, setMaterialSize] = useState('');
 
   useEffect(() => {
-    Promise.all([AsyncStorage.getItem(DIAGNOSIS_KEY), AsyncStorage.getItem(ERROR_KEY), AsyncStorage.getItem(BRANDS_KEY), AsyncStorage.getItem(MATERIALS_KEY)]).then(([diagnosisValue, errorValue, brandsValue, materialsValue]) => {
+    Promise.all([AsyncStorage.getItem(DIAGNOSIS_KEY), AsyncStorage.getItem(ERROR_KEY), AsyncStorage.getItem(BRANDS_KEY), AsyncStorage.getItem(MATERIALS_KEY), AsyncStorage.getItem(CARRIER_ROOM_RECEIVER_SEEDED_KEY)]).then(async ([diagnosisValue, errorValue, brandsValue, materialsValue, seededValue]) => {
       if (diagnosisValue) setDiagnoses(JSON.parse(diagnosisValue));
-      if (errorValue) setErrorCodes(JSON.parse(errorValue));
-      if (brandsValue) setManagedBrands(JSON.parse(brandsValue));
+      const savedBrands: ManagedBrand[] = brandsValue ? JSON.parse(brandsValue) : brands;
+      setManagedBrands(savedBrands);
       if (materialsValue) setMaterials(JSON.parse(materialsValue));
+      let savedErrors: CustomErrorCode[] = errorValue ? JSON.parse(errorValue) : [];
+      if (!seededValue) {
+        const carrier = savedBrands.find((item) => item.name.toLowerCase() === 'carrier' || item.local === 'كاريير');
+        const concealedModels = carrier?.models?.length ? carrier.models : ['كل موديلات كونسيلد'];
+        const seededErrors: CustomErrorCode[] = concealedModels.flatMap((modelName, modelIndex) => carrierRoomReceiverFaults.map((fault, faultIndex) => ({
+          id: `carrier-concealed-room-${modelIndex}-${faultIndex}`,
+          type: 'كونسيلد',
+          code: '',
+          brand: carrier?.name ?? 'Carrier',
+          model: modelName,
+          drive: 'إنفرتر',
+          roomReceiverCode: fault.code,
+          problem: fault.reason,
+          solution: 'افحص الجزء أو الدائرة المذكورة في وصف الكود، ثم أعد اختبار الجهاز بعد إصلاح السبب.',
+          createdAt: Date.now(),
+        })));
+        savedErrors = [...seededErrors, ...savedErrors];
+        await AsyncStorage.setItem(ERROR_KEY, JSON.stringify(savedErrors));
+        await AsyncStorage.setItem(CARRIER_ROOM_RECEIVER_SEEDED_KEY, '1');
+      }
+      setErrorCodes(savedErrors);
     }).catch(() => Alert.alert('خطأ', 'تعذر تحميل البيانات المحفوظة'));
   }, []);
 
