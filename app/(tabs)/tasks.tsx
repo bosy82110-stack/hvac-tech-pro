@@ -1,189 +1,45 @@
 import { useEffect, useState } from "react";
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 import { router } from "expo-router";
-
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { brands as defaultBrands, ManagedBrand } from "@/shared/hvac-data";
 
-type MaintenanceTask = {
-  id: string;
-  device: string;
-  brandModel: string;
-  serviceDate: string;
-  nextServiceDate: string;
-  workDone: string;
-  suctionPressure: string;
-  dischargePressure: string;
-  suctionTemperature: string;
-  dischargeTemperature: string;
-  notes: string;
-};
+Notifications.setNotificationHandler({ handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }) });
 
+type MaintenanceTask = { id: string; device: string; brandModel: string; serviceDate: string; nextServiceDate: string; workDone: string; suctionPressure: string; dischargePressure: string; suctionTemperature: string; dischargeTemperature: string; notes: string; notificationId?: string };
 const STORAGE_KEY = "hvac_maintenance_tasks";
-const emptyForm: Omit<MaintenanceTask, "id"> = {
-  device: "",
-  brandModel: "",
-  serviceDate: "",
-  nextServiceDate: "",
-  workDone: "",
-  suctionPressure: "",
-  dischargePressure: "",
-  suctionTemperature: "",
-  dischargeTemperature: "",
-  notes: "",
-};
+const emptyForm: Omit<MaintenanceTask, "id" | "notificationId"> = { device: "", brandModel: "", serviceDate: "", nextServiceDate: "", workDone: "", suctionPressure: "", dischargePressure: "", suctionTemperature: "", dischargeTemperature: "", notes: "" };
+
+function parseDate(value: string) { const parts = value.trim().split(/[\\/-]/).map(Number); if (parts.length !== 3 || parts.some(Number.isNaN)) return null; const [day, month, year] = parts; const date = new Date(year < 100 ? 2000 + year : year, month - 1, day, 9, 0, 0); return Number.isNaN(date.getTime()) ? null : date; }
+function htmlForTask(task: MaintenanceTask) { const rows = [["اسم أو رقم الجهاز", task.device], ["الماركة والموديل", task.brandModel || "غير محدد"], ["تاريخ الصيانة", task.serviceDate || "غير محدد"], ["الصيانة القادمة", task.nextServiceDate || "غير محدد"], ["ما تم في الزيارة", task.workDone || "غير محدد"], ["ضغط السحب PSI", task.suctionPressure || "غير محدد"], ["ضغط الطرد PSI", task.dischargePressure || "غير محدد"], ["حرارة خط السحب °C", task.suctionTemperature || "غير محدد"], ["حرارة خط الطرد °C", task.dischargeTemperature || "غير محدد"], ["ملاحظات", task.notes || "لا توجد"]]; return `<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Arial;color:#102A43;padding:28px}h1{color:#087F8C;text-align:center}table{width:100%;border-collapse:collapse;margin-top:20px}td{border:1px solid #B8C7D1;padding:12px;font-size:16px}td:first-child{font-weight:bold;background:#E8F7FA;width:35%}</style></head><body><h1>سجل صيانة HVAC TECH PRO</h1><table>${rows.map(([a,b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}</table></body></html>`; }
 
 export default function TasksScreen() {
   const colors = useColors();
   const [tasks, setTasks] = useState<MaintenanceTask[]>([]);
   const [form, setForm] = useState(emptyForm);
+  const [managedBrands, setManagedBrands] = useState<ManagedBrand[]>(defaultBrands);
+  const [brandOpen, setBrandOpen] = useState(false);
+  const [modelOpen, setModelOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
 
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((value) => {
-      if (value) setTasks(JSON.parse(value));
-    });
-  }, []);
-
-  const update = (key: keyof typeof emptyForm, value: string) =>
-    setForm((current) => ({ ...current, [key]: value }));
-
-  const saveTask = async () => {
-    if (!form.device.trim()) {
-      Alert.alert("بيانات ناقصة", "اكتب اسم أو رقم الجهاز أولًا.");
-      return;
-    }
-    const next = [{ id: Date.now().toString(), ...form }, ...tasks];
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setTasks(next);
-    setForm(emptyForm);
-    Alert.alert("تم الحفظ", "تم حفظ سجل الصيانة داخل المهام.");
-  };
-
-  const deleteTask = (id: string) =>
-    Alert.alert("حذف سجل الصيانة", "هل تريد حذف هذا السجل؟", [
-      { text: "إلغاء", style: "cancel" },
-      {
-        text: "حذف",
-        style: "destructive",
-        onPress: async () => {
-          const next = tasks.filter((item) => item.id !== id);
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-          setTasks(next);
-        },
-      },
-    ]);
-
-  const field = (label: string, key: keyof typeof emptyForm, placeholder: string, multiline = false) => (
-    <View style={styles.field}>
-      <Text style={[styles.label, { color: colors.foreground }]}>{label}</Text>
-      <TextInput
-        value={form[key]}
-        onChangeText={(value) => update(key, value)}
-        placeholder={placeholder}
-        placeholderTextColor={colors.muted}
-        multiline={multiline}
-        style={[
-          styles.input,
-          multiline && styles.multiline,
-          { color: colors.foreground, backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      />
-    </View>
-  );
-
-  return (
-    <ScreenContainer edges={["top", "left", "right"]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Pressable onPress={() => router.back()} style={styles.backRow}>
-          <IconSymbol name="chevron.left" size={20} color={colors.primary} />
-          <Text style={[styles.backText, { color: colors.primary }]}>العودة</Text>
-        </Pressable>
-        <Text style={[styles.title, { color: colors.foreground }]}>المهام وسجل الصيانة</Text>
-        <Text style={[styles.subtitle, { color: colors.muted }]}>بيانات الجهاز، ما تم تنفيذه، وموعد الزيارة القادمة</Text>
-
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {field("اسم أو رقم الجهاز", "device", "مثال: تكييف مكتب 1")}
-          {field("الماركة والموديل", "brandModel", "مثال: Carrier 2P14S225CZ")}
-          <View style={styles.twoColumns}>
-            <View style={styles.column}>{field("تاريخ الصيانة", "serviceDate", "يوم/شهر/سنة")}</View>
-            <View style={styles.column}>{field("الصيانة القادمة", "nextServiceDate", "يوم/شهر/سنة")}</View>
-          </View>
-          {field("ما تم في الزيارة", "workDone", "تنظيف، شحن، تغيير قطعة...", true)}
-          <Text style={[styles.sectionLabel, { color: colors.primary }]}>قراءات التشغيل</Text>
-          <View style={styles.twoColumns}>
-            <View style={styles.column}>{field("ضغط السحب PSI", "suctionPressure", "مثال: 68")}</View>
-            <View style={styles.column}>{field("ضغط الطرد PSI", "dischargePressure", "مثال: 240")}</View>
-          </View>
-          <View style={styles.twoColumns}>
-            <View style={styles.column}>{field("حرارة خط السحب °C", "suctionTemperature", "مثال: 9")}</View>
-            <View style={styles.column}>{field("حرارة خط الطرد °C", "dischargeTemperature", "مثال: 72")}</View>
-          </View>
-          {field("ملاحظات", "notes", "أي ملاحظة تريد الرجوع إليها", true)}
-          <Pressable onPress={saveTask} style={({ pressed }) => [styles.saveButton, { backgroundColor: colors.primary }, pressed && { opacity: 0.75 }]}>
-            <IconSymbol name="checkmark" size={20} color="#FFFFFF" />
-            <Text style={styles.saveText}>حفظ سجل الصيانة</Text>
-          </Pressable>
-        </View>
-
-        <Text style={[styles.listTitle, { color: colors.foreground }]}>السجلات المحفوظة ({tasks.length})</Text>
-        {tasks.length === 0 ? (
-          <View style={[styles.empty, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.emptyText, { color: colors.muted }]}>لا توجد سجلات بعد. أضف أول زيارة صيانة من النموذج.</Text>
-          </View>
-        ) : tasks.map((task) => (
-          <View key={task.id} style={[styles.record, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <View style={styles.recordHeader}>
-              <View style={styles.recordIcon}><IconSymbol name="wrench.and.screwdriver.fill" size={20} color="#FFFFFF" /></View>
-              <View style={styles.recordCopy}>
-                <Text style={[styles.recordTitle, { color: colors.foreground }]}>{task.device}</Text>
-                <Text style={[styles.recordSub, { color: colors.muted }]}>{task.brandModel || "بدون موديل"}</Text>
-              </View>
-              <Pressable onPress={() => deleteTask(task.id)}><IconSymbol name="trash" size={20} color="#DC2626" /></Pressable>
-            </View>
-            <Text style={[styles.recordLine, { color: colors.foreground }]}>الصيانة: {task.serviceDate || "غير محدد"}  |  القادمة: {task.nextServiceDate || "غير محدد"}</Text>
-            {!!task.workDone && <Text style={[styles.recordLine, { color: colors.muted }]}>تم التنفيذ: {task.workDone}</Text>}
-            <Text style={[styles.recordLine, { color: colors.muted }]}>السحب {task.suctionPressure || "-"} PSI  •  الطرد {task.dischargePressure || "-"} PSI  •  السحب الحراري {task.suctionTemperature || "-"}°C  •  الطرد الحراري {task.dischargeTemperature || "-"}°C</Text>
-          </View>
-        ))}
-      </ScrollView>
-    </ScreenContainer>
-  );
+  useEffect(() => { AsyncStorage.getItem(STORAGE_KEY).then((value) => { if (value) setTasks(JSON.parse(value)); }); AsyncStorage.getItem("hvac_managed_brands").then((value) => { if (value) setManagedBrands(JSON.parse(value)); }); }, []);
+  const update = (key: keyof typeof emptyForm, value: string) => setForm((current) => ({ ...current, [key]: value }));
+  const selectedBrand = form.brandModel.split(" | ")[0] || "";
+  const selectedModel = form.brandModel.split(" | ").slice(1).join(" | ");
+  const chooseBrand = (brand: ManagedBrand) => { update("brandModel", brand.name); setBrandOpen(false); setModelOpen(true); };
+  const chooseModel = (model: string) => { update("brandModel", `${selectedBrand} | ${model}`); setModelOpen(false); };
+  const scheduleReminder = async (task: MaintenanceTask) => { if (!task.nextServiceDate) return undefined; const date = parseDate(task.nextServiceDate); if (!date) return undefined; const reminder = new Date(date.getTime() - 2 * 24 * 60 * 60 * 1000); if (reminder <= new Date()) return undefined; const permission = await Notifications.getPermissionsAsync(); if (!permission.granted) { const requested = await Notifications.requestPermissionsAsync(); if (!requested.granted) return undefined; } if (process.env.EXPO_OS === "android") await Notifications.setNotificationChannelAsync("maintenance", { name: "مواعيد الصيانة", importance: Notifications.AndroidImportance.DEFAULT }); return Notifications.scheduleNotificationAsync({ content: { title: "موعد صيانة قريب", body: `موعد صيانة ${task.device} بعد يومين (${task.nextServiceDate})`, data: { taskId: task.id } }, trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: reminder } }); };
+  const saveTask = async () => { if (!form.device.trim()) { Alert.alert("بيانات ناقصة", "اكتب اسم أو رقم الجهاز أولًا."); return; } const task: MaintenanceTask = { id: Date.now().toString(), ...form }; const notificationId = await scheduleReminder(task); const saved = { ...task, notificationId }; const next = [saved, ...tasks]; await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)); setTasks(next); setForm(emptyForm); setBrandOpen(false); setModelOpen(false); Alert.alert("تم الحفظ", notificationId ? "تم حفظ المهمة وضبط التنبيه قبل الموعد بيومين." : "تم حفظ المهمة. تأكد من كتابة التاريخ بصيغة يوم/شهر/سنة ومنح صلاحية الإشعارات."); };
+  const deleteTask = (id: string) => Alert.alert("حذف سجل الصيانة", "هل تريد حذف هذا السجل؟", [{ text: "إلغاء", style: "cancel" }, { text: "حذف", style: "destructive", onPress: async () => { const item = tasks.find((task) => task.id === id); if (item?.notificationId) await Notifications.cancelScheduledNotificationAsync(item.notificationId); const next = tasks.filter((task) => task.id !== id); await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)); setTasks(next); if (selectedTask?.id === id) setSelectedTask(null); } }]);
+  const exportPdf = async (task: MaintenanceTask) => { try { setPdfBusy(true); const { uri } = await Print.printToFileAsync({ html: htmlForTask(task), width: 595, height: 842 }); if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: "مشاركة سجل الصيانة", UTI: "com.adobe.pdf" }); else Alert.alert("تم إنشاء PDF", uri); } catch { Alert.alert("تعذر التصدير", "حدث خطأ أثناء إنشاء ملف PDF."); } finally { setPdfBusy(false); } };
+  const field = (label: string, key: keyof typeof emptyForm, placeholder: string, multiline = false) => <View style={styles.field}><Text style={[styles.label, { color: colors.foreground }]}>{label}</Text><TextInput value={form[key]} onChangeText={(value) => update(key, value)} placeholder={placeholder} placeholderTextColor={colors.muted} multiline={multiline} style={[styles.input, multiline && styles.multiline, { color: colors.foreground, backgroundColor: colors.surface, borderColor: colors.border }]} /></View>;
+  return <ScreenContainer edges={["top", "left", "right"]}><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}><Pressable onPress={() => router.back()} style={styles.backRow}><IconSymbol name="chevron.left" size={20} color={colors.primary} /><Text style={[styles.backText, { color: colors.primary }]}>العودة</Text></Pressable><Text style={[styles.title, { color: colors.foreground }]}>المهام وسجل الصيانة</Text><Text style={[styles.subtitle, { color: colors.muted }]}>بيانات الجهاز، ما تم تنفيذه، وموعد الزيارة القادمة</Text><View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>{field("اسم أو رقم الجهاز", "device", "مثال: تكييف مكتب 1")}<Text style={[styles.label, { color: colors.foreground }]}>الماركة والموديل (اختياري)</Text><Pressable onPress={() => setBrandOpen(!brandOpen)} style={[styles.selector, { borderColor: colors.border, backgroundColor: colors.surface }]}><Text style={[styles.selectorText, { color: selectedBrand ? colors.foreground : colors.muted }]}>{selectedBrand || "اختيار ماركة من المحفوظ"}</Text><Text style={{ color: colors.primary }}>⌄</Text></Pressable>{brandOpen && <View style={[styles.options, { borderColor: colors.border }]}>{managedBrands.map((brand) => <Pressable key={brand.id} onPress={() => chooseBrand(brand)} style={styles.option}><Text style={[styles.optionText, { color: colors.foreground }]}>{brand.name}{brand.local ? ` - ${brand.local}` : ""}</Text></Pressable>)}</View>}{selectedBrand && <><Pressable onPress={() => setModelOpen(!modelOpen)} style={[styles.selector, { borderColor: colors.border, backgroundColor: colors.surface }]}><Text style={[styles.selectorText, { color: selectedModel ? colors.foreground : colors.muted }]}>{selectedModel || "اختيار موديل من المحفوظ (اختياري)"}</Text><Text style={{ color: colors.primary }}>⌄</Text></Pressable>{modelOpen && <View style={[styles.options, { borderColor: colors.border }]}>{(managedBrands.find((brand) => brand.name === selectedBrand)?.models || []).map((model) => <Pressable key={model} onPress={() => chooseModel(model)} style={styles.option}><Text style={[styles.optionText, { color: colors.foreground }]}>{model}</Text></Pressable>)}{!(managedBrands.find((brand) => brand.name === selectedBrand)?.models || []).length && <Text style={[styles.noOptions, { color: colors.muted }]}>لا توجد موديلات محفوظة لهذه الماركة.</Text>}</View>}</>}{field("تاريخ الصيانة", "serviceDate", "يوم/شهر/سنة")}{field("الصيانة القادمة", "nextServiceDate", "يوم/شهر/سنة")}{field("ما تم في الزيارة", "workDone", "تنظيف، شحن، تغيير قطعة...", true)}<Text style={[styles.sectionLabel, { color: colors.primary }]}>قراءات التشغيل</Text><View style={styles.twoColumns}><View style={styles.column}>{field("ضغط السحب PSI", "suctionPressure", "مثال: 68")}</View><View style={styles.column}>{field("ضغط الطرد PSI", "dischargePressure", "مثال: 240")}</View></View><View style={styles.twoColumns}><View style={styles.column}>{field("حرارة خط السحب °C", "suctionTemperature", "مثال: 9")}</View><View style={styles.column}>{field("حرارة خط الطرد °C", "dischargeTemperature", "مثال: 72")}</View></View>{field("ملاحظات", "notes", "أي ملاحظة تريد الرجوع إليها", true)}<Pressable onPress={saveTask} style={[styles.saveButton, { backgroundColor: colors.primary }]}><IconSymbol name="checkmark" size={20} color="#FFFFFF" /><Text style={styles.saveText}>حفظ سجل الصيانة</Text></Pressable></View><Text style={[styles.listTitle, { color: colors.foreground }]}>السجلات المحفوظة ({tasks.length})</Text>{tasks.length === 0 ? <View style={[styles.empty, { backgroundColor: colors.surface, borderColor: colors.border }]}><Text style={[styles.emptyText, { color: colors.muted }]}>لا توجد سجلات بعد. أضف أول زيارة صيانة من النموذج.</Text></View> : tasks.map((task) => <Pressable key={task.id} onPress={() => setSelectedTask(task)} style={[styles.record, { backgroundColor: colors.surface, borderColor: colors.border }]}><View style={styles.recordHeader}><View style={styles.recordIcon}><IconSymbol name="wrench.and.screwdriver.fill" size={20} color="#FFFFFF" /></View><View style={styles.recordCopy}><Text style={[styles.recordTitle, { color: colors.foreground }]}>{task.device}</Text><Text style={[styles.recordSub, { color: colors.muted }]}>{task.brandModel || "بدون موديل"}</Text></View><Pressable onPress={() => deleteTask(task.id)}><IconSymbol name="trash" size={20} color="#DC2626" /></Pressable></View><Text style={[styles.recordLine, { color: colors.foreground }]}>الصيانة: {task.serviceDate || "غير محدد"} | القادمة: {task.nextServiceDate || "غير محدد"}</Text><Text style={[styles.recordLine, { color: colors.muted }]}>اضغط لفتح تفاصيل المهمة وPDF</Text></Pressable>)}</ScrollView><Modal visible={!!selectedTask} transparent animationType="slide" onRequestClose={() => setSelectedTask(null)}><View style={styles.modalBackdrop}><View style={[styles.modalCard, { backgroundColor: colors.surface }]}>{selectedTask && <ScrollView><Text style={[styles.modalTitle, { color: colors.foreground }]}>تفاصيل المهمة</Text><Text style={[styles.modalDevice, { color: colors.primary }]}>{selectedTask.device}</Text><Text style={[styles.modalText, { color: colors.foreground }]}>الماركة والموديل: {selectedTask.brandModel || "غير محدد"}</Text><Text style={[styles.modalText, { color: colors.foreground }]}>تاريخ الصيانة: {selectedTask.serviceDate || "غير محدد"}</Text><Text style={[styles.modalText, { color: colors.foreground }]}>الصيانة القادمة: {selectedTask.nextServiceDate || "غير محدد"}</Text><Text style={[styles.modalText, { color: colors.foreground }]}>ما تم في الزيارة: {selectedTask.workDone || "غير محدد"}</Text><Text style={[styles.modalText, { color: colors.foreground }]}>القراءات: سحب {selectedTask.suctionPressure || "-"} PSI، طرد {selectedTask.dischargePressure || "-"} PSI، سحب حراري {selectedTask.suctionTemperature || "-"}°C، طرد حراري {selectedTask.dischargeTemperature || "-"}°C</Text><Text style={[styles.modalText, { color: colors.foreground }]}>ملاحظات: {selectedTask.notes || "لا توجد"}</Text><Pressable onPress={() => exportPdf(selectedTask)} style={[styles.saveButton, { backgroundColor: colors.primary }]}><Text style={styles.saveText}>{pdfBusy ? "جارٍ تجهيز PDF..." : "تصدير ومشاركة PDF"}</Text></Pressable><Pressable onPress={() => setSelectedTask(null)} style={styles.closeButton}><Text style={[styles.closeText, { color: colors.primary }]}>إغلاق</Text></Pressable></ScrollView>}</View></View></Modal></ScreenContainer>;
 }
-
-const styles = StyleSheet.create({
-  content: { padding: 18, paddingBottom: 42 },
-  backRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 14 },
-  backText: { fontSize: 14, fontWeight: "700" },
-  title: { fontSize: 26, fontWeight: "900", textAlign: "right" },
-  subtitle: { fontSize: 14, textAlign: "right", marginTop: 5, marginBottom: 16 },
-  card: { borderWidth: 1, borderRadius: 20, padding: 14 },
-  field: { marginBottom: 12 },
-  label: { fontSize: 13, fontWeight: "800", textAlign: "right", marginBottom: 6 },
-  input: { minHeight: 46, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, textAlign: "right", fontSize: 14 },
-  multiline: { minHeight: 78, paddingTop: 12, textAlignVertical: "top" },
-  twoColumns: { flexDirection: "row", gap: 10 },
-  column: { flex: 1 },
-  sectionLabel: { fontSize: 15, fontWeight: "900", textAlign: "right", marginTop: 4, marginBottom: 10 },
-  saveButton: { minHeight: 50, borderRadius: 14, flexDirection: "row-reverse", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4 },
-  saveText: { color: "#FFFFFF", fontSize: 15, fontWeight: "900" },
-  listTitle: { fontSize: 19, fontWeight: "900", textAlign: "right", marginTop: 22, marginBottom: 10 },
-  empty: { borderWidth: 1, borderRadius: 16, padding: 18 },
-  emptyText: { textAlign: "right", fontSize: 14, lineHeight: 22 },
-  record: { borderWidth: 1, borderRadius: 16, padding: 14, marginBottom: 10 },
-  recordHeader: { flexDirection: "row-reverse", alignItems: "center", gap: 10 },
-  recordIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#0E7490", alignItems: "center", justifyContent: "center" },
-  recordCopy: { flex: 1 },
-  recordTitle: { fontSize: 16, fontWeight: "900", textAlign: "right" },
-  recordSub: { fontSize: 12, textAlign: "right", marginTop: 3 },
-  recordLine: { fontSize: 12, textAlign: "right", lineHeight: 20, marginTop: 8 },
-});
+const styles = StyleSheet.create({ content: { padding: 18, paddingBottom: 42 }, backRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 14 }, backText: { fontSize: 14, fontWeight: "700" }, title: { fontSize: 26, fontWeight: "900", textAlign: "right" }, subtitle: { fontSize: 14, textAlign: "right", marginTop: 5, marginBottom: 16 }, card: { borderWidth: 1, borderRadius: 20, padding: 14 }, field: { marginBottom: 12 }, label: { fontSize: 13, fontWeight: "800", textAlign: "right", marginBottom: 6 }, input: { minHeight: 46, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, textAlign: "right", fontSize: 14 }, multiline: { minHeight: 78, paddingTop: 12, textAlignVertical: "top" }, twoColumns: { flexDirection: "row", gap: 10 }, column: { flex: 1 }, sectionLabel: { fontSize: 15, fontWeight: "900", textAlign: "right", marginTop: 4, marginBottom: 10 }, selector: { minHeight: 46, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }, selectorText: { fontSize: 14, textAlign: "right" }, options: { borderWidth: 1, borderRadius: 12, marginBottom: 10, overflow: "hidden" }, option: { padding: 13, borderBottomWidth: 1, borderBottomColor: "#D5E1E8" }, optionText: { textAlign: "right", fontSize: 14 }, noOptions: { padding: 13, textAlign: "right" }, saveButton: { minHeight: 50, borderRadius: 14, flexDirection: "row-reverse", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4, paddingHorizontal: 14 }, saveText: { color: "#FFFFFF", fontSize: 15, fontWeight: "900", textAlign: "center" }, listTitle: { fontSize: 19, fontWeight: "900", textAlign: "right", marginTop: 22, marginBottom: 10 }, empty: { borderWidth: 1, borderRadius: 16, padding: 18 }, emptyText: { textAlign: "right", fontSize: 14, lineHeight: 22 }, record: { borderWidth: 1, borderRadius: 16, padding: 14, marginBottom: 10 }, recordHeader: { flexDirection: "row-reverse", alignItems: "center", gap: 10 }, recordIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#0E7490", alignItems: "center", justifyContent: "center" }, recordCopy: { flex: 1 }, recordTitle: { fontSize: 16, fontWeight: "900", textAlign: "right" }, recordSub: { fontSize: 12, textAlign: "right", marginTop: 3 }, recordLine: { fontSize: 12, textAlign: "right", lineHeight: 20, marginTop: 8 }, modalBackdrop: { flex: 1, backgroundColor: "#0008", justifyContent: "flex-end" }, modalCard: { maxHeight: "82%", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 }, modalTitle: { fontSize: 22, fontWeight: "900", textAlign: "right" }, modalDevice: { fontSize: 18, fontWeight: "900", textAlign: "right", marginTop: 10 }, modalText: { fontSize: 15, lineHeight: 25, textAlign: "right", marginTop: 10 }, closeButton: { borderWidth: 1, borderColor: "#0E7490", borderRadius: 14, padding: 14, alignItems: "center", marginTop: 10 }, closeText: { fontSize: 15, fontWeight: "900" } });
