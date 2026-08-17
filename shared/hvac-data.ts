@@ -7,7 +7,7 @@ export type ReferenceItem = {
   accent: string;
 };
 
-export type HvacDeviceType = "سبليت" | "مركزي" | "VRF" | "غرف تبريد";
+export type HvacDeviceType = "سبليت" | "مركزي" | "VRF" | "غرف تبريد" | "كونسيلد";
 
 export type CustomDiagnosis = {
   id: string;
@@ -61,6 +61,8 @@ export type CustomErrorCode = {
   brand: string;
   model: string;
   drive: "عادي" | "إنفرتر";
+  roomReceiverCode?: string;
+  deviceReceiverCode?: string;
   problem: string;
   solution: string;
   createdAt: number;

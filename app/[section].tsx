@@ -459,6 +459,8 @@ export default function SectionScreen() {
     brand: string;
     model: string;
     drive: string;
+    roomReceiverCode?: string;
+    deviceReceiverCode?: string;
     problem: string;
     solution: string;
     type: string;
@@ -570,7 +572,7 @@ export default function SectionScreen() {
     (x) =>
       x.type === errorDevice &&
       normalizedQuery.length > 0 &&
-      `${x.code} ${x.brand} ${x.model} ${x.problem}`
+      `${x.code} ${x.roomReceiverCode ?? ''} ${x.deviceReceiverCode ?? ''} ${x.brand} ${x.model} ${x.problem}`
         .toLowerCase()
         .includes(normalizedQuery),
   );
@@ -2466,6 +2468,8 @@ export default function SectionScreen() {
         brand: item.brand,
         model: item.model,
         drive: item.drive,
+        roomReceiverCode: item.roomReceiverCode,
+        deviceReceiverCode: item.deviceReceiverCode,
         problem: item.problem,
         solution: item.solution,
         type: item.type,
@@ -2539,6 +2543,8 @@ export default function SectionScreen() {
                 <Text style={[styles.detailsRow, { color: colors.foreground }]}>
                   نوع التشغيل: {selectedError.drive}
                 </Text>
+                {selectedError.roomReceiverCode ? <Text style={[styles.detailsRow, { color: colors.foreground }]}>كود رسيفر الغرفة: {selectedError.roomReceiverCode}</Text> : null}
+                {selectedError.deviceReceiverCode ? <Text style={[styles.detailsRow, { color: colors.foreground }]}>كود رسيفر الجهاز: {selectedError.deviceReceiverCode}</Text> : null}
                 <Text style={[styles.detailsLabel, { color: colors.primary }]}>
                   وصف العطل
                 </Text>
@@ -2849,7 +2855,7 @@ export default function SectionScreen() {
             نوع الجهاز
           </Text>
           <View style={styles.choiceRow}>
-            {["سبليت", "مركزي", "غرف تبريد", "VRF"].map((x) => (
+            {["سبليت", "مركزي", "غرف تبريد", "VRF", "كونسيلد"].map((x) => (
               <Pressable
                 key={x}
                 onPress={() => {
@@ -3364,7 +3370,7 @@ export default function SectionScreen() {
               نوع الجهاز
             </Text>
             <View style={styles.errorDeviceRow}>
-              {(["سبليت", "مركزي", "غرف تبريد", "VRF"] as HvacDeviceType[]).map(
+              {(["سبليت", "مركزي", "غرف تبريد", "VRF", "كونسيلد"] as HvacDeviceType[]).map(
                 (item) => (
                   <Pressable
                     key={item}
