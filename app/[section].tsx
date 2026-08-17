@@ -3256,7 +3256,7 @@ export default function SectionScreen() {
                             key={cause}
                             style={[
                               styles.fieldGuideText,
-                              { color: "#0F172A" },
+                              { color: "#7C2D12", fontWeight: "700" },
                             ]}
                           >
                             • {cause}
@@ -3272,7 +3272,7 @@ export default function SectionScreen() {
                             key={step}
                             style={[
                               styles.fieldGuideText,
-                              { color: "#0F172A" },
+                              { color: "#065F46", fontWeight: "700" },
                             ]}
                           >
                             {index + 1}. {step}
@@ -3939,16 +3939,31 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   fieldGuideTitleWrap: { flex: 1, alignItems: "flex-end" },
-  fieldGuideTitle: { fontSize: 14, fontWeight: "900", textAlign: "right" },
-  fieldGuideEnglish: { fontSize: 10, marginTop: 3, textAlign: "right" },
-  fieldGuideBody: { paddingHorizontal: 13, paddingBottom: 14, gap: 6 },
+  fieldGuideTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+    textAlign: "right",
+    color: "#0E7490",
+  },
+  fieldGuideEnglish: {
+    fontSize: 11,
+    fontWeight: "700",
+    marginTop: 3,
+    textAlign: "right",
+  },
+  fieldGuideBody: { paddingHorizontal: 13, paddingBottom: 14, gap: 7 },
   fieldGuideLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "900",
     textAlign: "right",
     marginTop: 5,
   },
-  fieldGuideText: { fontSize: 12, lineHeight: 20, textAlign: "right" },
+  fieldGuideText: {
+    fontSize: 14,
+    lineHeight: 23,
+    fontWeight: "600",
+    textAlign: "right",
+  },
   pipeTable: {
     width: "100%",
     borderWidth: 1,
