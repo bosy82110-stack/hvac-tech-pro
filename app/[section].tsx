@@ -3193,6 +3193,7 @@ export default function SectionScreen() {
               </Text>
               {fieldDiagnosisGuides.map((guide) => {
                 const isOpen = selectedFieldGuideId === guide.id;
+                const isPressureGuide = guide.category === "الضغط والأمبير";
                 return (
                   <View
                     key={guide.id}
@@ -3246,26 +3247,30 @@ export default function SectionScreen() {
                     </Pressable>
                     {isOpen && (
                       <View style={styles.fieldGuideBody}>
-                        <Text
-                          style={[styles.fieldGuideLabel, { color: "#9A5B00" }]}
-                        >
-                          الأسباب / الظواهر
-                        </Text>
-                        {guide.causes.map((cause) => (
-                          <Text
-                            key={cause}
-                            style={[
-                              styles.fieldGuideText,
-                              { color: "#7C2D12", fontWeight: "700" },
-                            ]}
-                          >
-                            • {cause}
-                          </Text>
-                        ))}
+                        {!isPressureGuide && (
+                          <>
+                            <Text
+                              style={[styles.fieldGuideLabel, { color: "#9A5B00" }]}
+                            >
+                              الأسباب / الظواهر
+                            </Text>
+                            {guide.causes.map((cause) => (
+                              <Text
+                                key={cause}
+                                style={[
+                                  styles.fieldGuideText,
+                                  { color: "#7C2D12", fontWeight: "700" },
+                                ]}
+                              >
+                                • {cause}
+                              </Text>
+                            ))}
+                          </>
+                        )}
                         <Text
                           style={[styles.fieldGuideLabel, { color: "#16A36A" }]}
                         >
-                          الحل / خطوات الفحص الميداني
+                          {isPressureGuide ? "الحل" : "الحل / خطوات الفحص الميداني"}
                         </Text>
                         {guide.steps.map((step, index) => (
                           <Text
@@ -3275,7 +3280,7 @@ export default function SectionScreen() {
                               { color: "#065F46", fontWeight: "700" },
                             ]}
                           >
-                            {index + 1}. {step}
+                            {isPressureGuide ? step : `${index + 1}. ${step}`}
                           </Text>
                         ))}
                       </View>
