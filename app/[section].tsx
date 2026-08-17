@@ -1192,6 +1192,9 @@ export default function SectionScreen() {
                 <Text style={[styles.pressureCell, styles.pipeHeaderText]}>
                   ضغط الطرد
                 </Text>
+                <Text style={[styles.pressureCell, styles.pipeHeaderText]}>
+                  حرارة الجو
+                </Text>
               </View>
               {pressureAmpGuide.operatingPressures.map((row) => (
                 <View
@@ -1213,9 +1216,15 @@ export default function SectionScreen() {
                   >
                     {row.discharge}
                   </Text>
+                  <Text
+                    style={[styles.pressureCell, { color: colors.foreground }]}
+                  >
+                    30°C
+                  </Text>
                 </View>
               ))}
             </View>
+            <Text style={[styles.pipeNoteText, { color: colors.muted }]}>القيم الحالية مرجعية عند درجة حرارة جو 30°C، وتتغير حسب الحمل وحالة الجهاز.</Text>
             <Text
               style={[
                 styles.detailsTitle,

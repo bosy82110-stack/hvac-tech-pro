@@ -93,6 +93,13 @@ const quickActions = [
     route: "/pipe-measure",
   },
   {
+    title: "قارئ لوحة البيانات",
+    subtitle: "تصوير ومراجعة بيانات الجهاز",
+    icon: "camera.fill" as const,
+    tone: "#0284C7",
+    route: "/label-reader",
+  },
+  {
     title: "دليل الضغوط والأمبير",
     subtitle: "R22 وR410A",
     icon: "bolt.fill" as const,
@@ -277,7 +284,7 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {
-              if (item.route === "/pipe-measure" || item.route === "/refrigerant-calculator") {
+              if (item.route === "/pipe-measure" || item.route === "/refrigerant-calculator" || item.route === "/label-reader") {
                 router.push(item.route as any);
               } else {
                 router.push({
