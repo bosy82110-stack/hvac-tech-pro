@@ -10,8 +10,8 @@ const DIAGNOSIS_KEY = 'hvac_custom_diagnoses';
 const ERROR_KEY = 'hvac_custom_error_codes';
 const BRANDS_KEY = 'hvac_managed_brands';
 const MATERIALS_KEY = 'hvac_custom_materials';
-const CARRIER_FAULT_SEED_VERSION = 'hvac_carrier_concealed_faults_seed_v3';
-const classicoolModels = ['Classicool-53QDMT(18)(24)(36)DN-718 A6 كونسيلد بارد/ساخن/إنفرتر', 'Classicool-53QDHT(48)(60)DN-518 TG كونسيلد بارد/ساخن/إنفرتر'];
+const CARRIER_FAULT_SEED_VERSION = 'hvac_carrier_concealed_faults_seed_v4';
+const classicoolModels = ['Classicool-53QDMT(18)(24)(36)DN-718 A6', 'Classicool-53QDHT(48)(60)DN-518 TG'];
 const carrierRoomReceiverFaults = [
   ['E0', 'عطل في الوحدة الخارجية', 'افحص تغذية الوحدة الخارجية والفيوزات ولوحة التحكم وتوصيلات الاتصال قبل استبدال اللوحة.'],
   ['E1', 'خطأ في الاتصال بين الوحدتين الداخلية والخارجية أو سقوط فازة L1', 'افحص كابل الاتصال وترتيب الأطراف والفازات والجهد بين الوحدتين ثم أصلح الطرف أو الكابل التالف.'],
@@ -47,7 +47,8 @@ const carrierDeviceReceiverFaults = [
   ['P7', 'عطل IGBT وعمل الحماية', 'افحص قصر الضاغط وتغذية IGBT والمشتت واستبدل دائرة القدرة بعد إزالة سبب الحمل الزائد.'],
   ['F8', 'خطأ اتصال بين شريحتي الوحدة الداخلية', 'افحص كابل الاتصال والفيش والجهد المرجعي بين اللوحتين ثم أصلح أو استبدل الكابل.'],
 ] as const;
-const getErrorModels = (item: CustomErrorCode) => Array.from(new Set([...(item.models ?? []), ...(item.model ? [item.model] : [])].map((value) => value.trim()).filter(Boolean)));
+const normalizeModelName = (value: string) => value.trim().replace(/\s*[-–]?\s*(?:كونسيلد|بارد\/ساخن\/إنفرتر|بارد\/ساخن|بارد|ساخن|إنفرتر)\b.*$/i, '').trim();
+const getErrorModels = (item: CustomErrorCode) => Array.from(new Set([...(item.models ?? []), ...(item.model ? [item.model] : [])].map((value) => normalizeModelName(value)).filter(Boolean)));
 const errorSignature = (item: CustomErrorCode) => [item.type, item.code, item.brand, item.drive, item.roomReceiverCode ?? '', item.deviceReceiverCode ?? '', getErrorModels(item).sort().join('||'), item.problem.trim(), item.solution.trim()].join('|');
 const dedupeErrorCodes = (items: CustomErrorCode[]) => items.filter((item, index, list) => list.findIndex((candidate) => errorSignature(candidate) === errorSignature(item)) === index);
 const deviceTypes: HvacDeviceType[] = ['سبليت', 'مركزي', 'غرف تبريد', 'VRF', 'كونسيلد'];
@@ -95,6 +96,7 @@ export default function SettingsScreen() {
     Promise.all([AsyncStorage.getItem(DIAGNOSIS_KEY), AsyncStorage.getItem(ERROR_KEY), AsyncStorage.getItem(BRANDS_KEY), AsyncStorage.getItem(MATERIALS_KEY), AsyncStorage.getItem(CARRIER_FAULT_SEED_VERSION)]).then(async ([diagnosisValue, errorValue, brandsValue, materialsValue, seededValue]) => {
       if (diagnosisValue) setDiagnoses(JSON.parse(diagnosisValue));
       let savedBrands: ManagedBrand[] = brandsValue ? JSON.parse(brandsValue) : brands;
+      savedBrands = savedBrands.map((item) => ({ ...item, models: Array.from(new Set(item.models.map(normalizeModelName).filter(Boolean))) }));
       const carrierIndex = savedBrands.findIndex((item) => item.name.toLowerCase() === 'carrier' || item.local === 'كاريير');
       if (carrierIndex >= 0) {
         const mergedModels = Array.from(new Set([...savedBrands[carrierIndex].models, ...classicoolModels]));
@@ -106,7 +108,7 @@ export default function SettingsScreen() {
       let savedErrors: CustomErrorCode[] = errorValue ? JSON.parse(errorValue) : [];
       if (seededValue !== CARRIER_FAULT_SEED_VERSION) {
         const carrier = savedBrands.find((item) => item.name.toLowerCase() === 'carrier' || item.local === 'كاريير');
-        const concealedModels = carrier?.models?.length ? carrier.models : classicoolModels;
+        const concealedModels = classicoolModels;
         const makeSeed = (prefix: string, list: readonly (readonly [string, string, string])[], receiver: 'roomReceiverCode' | 'deviceReceiverCode') => list.map(([faultCode, reason, repair], index) => ({ id: `carrier-concealed-${prefix}-${index}`, type: 'كونسيلد' as HvacDeviceType, code: '', brand: carrier?.name ?? 'Carrier', model: concealedModels.join('، '), models: concealedModels, drive: 'إنفرتر' as const, [receiver]: faultCode, problem: reason, solution: repair, createdAt: Date.now() } as CustomErrorCode));
         const legacyFree = savedErrors.filter((item) => !item.id.startsWith('carrier-concealed-'));
         const seededErrors = [...makeSeed('room', carrierRoomReceiverFaults, 'roomReceiverCode'), ...makeSeed('device', carrierDeviceReceiverFaults, 'deviceReceiverCode')];
