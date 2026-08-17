@@ -51,6 +51,13 @@ const quickActions = [
     route: "/calculators",
   },
   {
+    title: "حاسبة الفريون",
+    subtitle: "الشحنة حسب BTU وطول المواسير",
+    icon: "snowflake" as const,
+    tone: "#06B6D4",
+    route: "/refrigerant-calculator",
+  },
+  {
     title: "الفريونات والزيوت",
     subtitle: "مرجع التشغيل",
     icon: "snowflake" as const,
@@ -270,8 +277,8 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {
-              if (item.route === "/pipe-measure") {
-                router.push("/pipe-measure");
+              if (item.route === "/pipe-measure" || item.route === "/refrigerant-calculator") {
+                router.push(item.route as any);
               } else {
                 router.push({
                   pathname: "/[section]",
