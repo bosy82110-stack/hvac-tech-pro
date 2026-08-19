@@ -118,7 +118,7 @@ const quickActions = [
     subtitle: "حساب السوبرهيت والتبريد دونيًا",
     icon: "calculator" as const,
     tone: "#0E7490",
-    route: "/pressure-amp-guide",
+    route: "/pt-calculator",
   },
   {
     title: "محاكي الدوائر",

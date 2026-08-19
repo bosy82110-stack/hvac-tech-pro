@@ -301,6 +301,11 @@ const info: Record<string, { title: string; subtitle: string; icon: any }> = {
     subtitle: "مرجع تقريبي لـ R22 وR410A عند 220 فولت",
     icon: "bolt.fill",
   },
+  "pt-calculator": {
+    title: "حاسبة PT",
+    subtitle: "حساب السوبرهيت والتبريد دونيًا",
+    icon: "calculator",
+  },
   "circuit-reference": {
     title: "مرجع الدوائر",
     subtitle: "رسومات وشرح دوائر التبريد والميكانيكا والكهرباء",
@@ -1060,25 +1065,7 @@ export default function SectionScreen() {
         </View>
       );
     }
-    if (key === "pressure-amp-guide") {
-      return (
-        <View>
-          <View
-            style={[
-              styles.detailCard,
-              { backgroundColor: colors.surface, borderColor: "#D97706" },
-            ]}
-          >
-            <View style={[styles.circleIcon, { backgroundColor: "#FEF3C7" }]}>
-              <IconSymbol name="bolt.fill" size={24} color="#B45309" />
-            </View>
-            <Text style={[styles.detailsTitle, { color: colors.foreground }]}>
-              الأمبير الطبيعي أثناء التشغيل عند 220 فولت
-            </Text>
-            <Text style={[styles.detailsBody, { color: colors.muted }]}>
-              للمكيفات السبليت العادية On/Off. القيم تقريبية وتتأثر بدرجة الجو
-              والحمل وطول المواسير وحالة الجهاز.
-            </Text>
+    const ptCalculatorCard = (
             <View style={[styles.ptCard, { backgroundColor: colors.background, borderColor: "#0E7490" }]}>
               <Text style={[styles.detailsTitle, { color: colors.foreground }]}>حاسبة PT وتشخيص دورة التبريد</Text>
               <Text style={[styles.detailsBody, { color: colors.muted }]}>أدخل القياسات بدرجة مئوية والضغوط بالـ PSI. النتائج إرشادية ولا تغني عن جدول الشركة المصنعة.</Text>
@@ -1117,6 +1104,29 @@ export default function SectionScreen() {
               </View>
               <Text style={[styles.ptHint, { color: colors.muted }]}>المعادلة: Superheat = حرارة خط السحب − تشبع السحب، وSubcooling = تشبع السائل − حرارة خط السائل، وCondenser Split = هواء الخروج − الجو.</Text>
             </View>
+    );
+    if (key === "pt-calculator") {
+      return <View>{ptCalculatorCard}</View>;
+    }
+    if (key === "pressure-amp-guide") {
+      return (
+        <View>
+          <View
+            style={[
+              styles.detailCard,
+              { backgroundColor: colors.surface, borderColor: "#D97706" },
+            ]}
+          >
+            <View style={[styles.circleIcon, { backgroundColor: "#FEF3C7" }]}>
+              <IconSymbol name="bolt.fill" size={24} color="#B45309" />
+            </View>
+            <Text style={[styles.detailsTitle, { color: colors.foreground }]}>
+              الأمبير الطبيعي أثناء التشغيل عند 220 فولت
+            </Text>
+            <Text style={[styles.detailsBody, { color: colors.muted }]}>
+              للمكيفات السبليت العادية On/Off. القيم تقريبية وتتأثر بدرجة الجو
+              والحمل وطول المواسير وحالة الجهاز.
+            </Text>
             <View style={[styles.pipeTable, { borderColor: colors.border }]}>
               <View
                 style={[

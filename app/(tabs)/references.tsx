@@ -15,7 +15,7 @@ const references = [
   ["أقطار المواسير", "بوصة وملليمتر", "settings", "pipe-diameters", "#0F766E"],
   ["دليل الضغوط والأمبير", "قراءات التشغيل", "bolt.fill", "pressure-amp-guide", "#D97706"],
   ["مرجع الدوائر", "تبريد وكهرباء وكنترول", "book.fill", "circuit-reference", "#7C3AED"],
-  ["حاسبة PT", "سوبرهيت وتبريد دوني", "calculator", "pressure-amp-guide", "#0E7490"],
+  ["حاسبة PT", "سوبرهيت وتبريد دوني", "calculator", "pt-calculator", "#0E7490"],
   ["محاكي الدوائر", "كوّن دائرتك واكتشف الأخطاء", "bolt.fill", "circuit-simulator", "#DC2626"],
 ] as const;
 
