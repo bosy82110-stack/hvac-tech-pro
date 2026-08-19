@@ -362,31 +362,36 @@ type PtPoint = { tempC: number; psig: number };
 // نقاط مرجعية تقريبية من جداول PT القياسية، مع استيفاء خطي بين النقاط.
 // الإدخال في الحاسبة بوحدة PSI، والنتيجة بدرجة مئوية.
 const ptTables: Record<string, PtPoint[]> = {
+  // PSIG مقابل °C؛ الاستيفاء الخطي بين النقاط، وتشمل القيم المرجعية R22: 70 PSIG ≈ 5°C.
   r22: [
-    { tempC: -40, psig: 5.3 },
-    { tempC: -30, psig: 16.0 },
-    { tempC: -20, psig: 29.0 },
-    { tempC: -10, psig: 42.5 },
-    { tempC: 0, psig: 57.5 },
-    { tempC: 10, psig: 85.3 },
-    { tempC: 20, psig: 124.5 },
-    { tempC: 30, psig: 171.0 },
-    { tempC: 40, psig: 224.4 },
-    { tempC: 50, psig: 288.4 },
-    { tempC: 60, psig: 360.0 },
+    { tempC: -40, psig: 5.3 }, { tempC: -30, psig: 16.0 }, { tempC: -20, psig: 29.0 },
+    { tempC: -10, psig: 42.5 }, { tempC: 0, psig: 57.5 }, { tempC: 5, psig: 70.0 },
+    { tempC: 10, psig: 84.1 }, { tempC: 20, psig: 116.6 }, { tempC: 30, psig: 158.6 },
+    { tempC: 40, psig: 207.0 }, { tempC: 50, psig: 266.0 }, { tempC: 60, psig: 337.4 },
   ],
   r410a: [
-    { tempC: -40, psig: 14.0 },
-    { tempC: -30, psig: 25.0 },
-    { tempC: -20, psig: 43.0 },
-    { tempC: -10, psig: 67.0 },
-    { tempC: 0, psig: 101.5 },
-    { tempC: 10, psig: 145.8 },
-    { tempC: 20, psig: 204.0 },
-    { tempC: 30, psig: 283.0 },
-    { tempC: 40, psig: 359.0 },
-    { tempC: 50, psig: 447.0 },
-    { tempC: 60, psig: 550.0 },
+    { tempC: -40, psig: 10.1 }, { tempC: -30, psig: 25.9 }, { tempC: -20, psig: 43.0 },
+    { tempC: -10, psig: 67.0 }, { tempC: 0, psig: 101.6 }, { tempC: 5, psig: 121.8 },
+    { tempC: 10, psig: 143.3 }, { tempC: 20, psig: 195.3 }, { tempC: 30, psig: 274.3 },
+    { tempC: 40, psig: 339.9 }, { tempC: 50, psig: 430.0 }, { tempC: 60, psig: 537.6 },
+  ],
+  r407c: [
+    { tempC: -40, psig: 4.8 }, { tempC: -30, psig: 12.0 }, { tempC: -20, psig: 20.4 },
+    { tempC: -10, psig: 38.0 }, { tempC: 0, psig: 50.9 }, { tempC: 5, psig: 63.1 },
+    { tempC: 10, psig: 77.1 }, { tempC: 20, psig: 108.0 }, { tempC: 30, psig: 145.0 },
+    { tempC: 40, psig: 190.0 }, { tempC: 50, psig: 264.0 }, { tempC: 60, psig: 380.9 },
+  ],
+  r134a: [
+    { tempC: -40, psig: 0.6 }, { tempC: -30, psig: 4.8 }, { tempC: -20, psig: 10.7 },
+    { tempC: -10, psig: 18.9 }, { tempC: 0, psig: 27.8 }, { tempC: 5, psig: 36.0 },
+    { tempC: 10, psig: 45.4 }, { tempC: 20, psig: 68.8 }, { tempC: 30, psig: 97.0 },
+    { tempC: 40, psig: 132.0 }, { tempC: 50, psig: 174.0 }, { tempC: 60, psig: 229.2 },
+  ],
+  r404a: [
+    { tempC: -40, psig: 4.9 }, { tempC: -30, psig: 10.3 }, { tempC: -20, psig: 16.8 },
+    { tempC: -10, psig: 33.7 }, { tempC: 0, psig: 73.8 }, { tempC: 5, psig: 88.6 },
+    { tempC: 10, psig: 105.3 }, { tempC: 20, psig: 143.8 }, { tempC: 30, psig: 193.0 },
+    { tempC: 40, psig: 250.0 }, { tempC: 50, psig: 321.0 }, { tempC: 60, psig: 403.7 },
   ],
 };
 
