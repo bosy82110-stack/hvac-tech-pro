@@ -3630,6 +3630,68 @@ export default function SectionScreen() {
               هذه مؤشرات إرشادية وليست حكمًا نهائيًا؛ يجب مقارنتها بدرجة الحرارة
               والحمل وبيانات لوحة الجهاز.
             </Text>
+            <View style={styles.faultTableWrap}>
+              <Text style={styles.faultTableTitle}>مؤشرات الضغط والأمبير</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator>
+                <View style={styles.faultTable}>
+                  <View style={styles.faultTableRow}>
+                    <View
+                      style={[
+                        styles.faultTableCell,
+                        styles.faultTableLabelCell,
+                        styles.faultTableHeaderCell,
+                      ]}
+                    >
+                      <Text style={styles.faultTableHeaderText}>المؤشر</Text>
+                    </View>
+                    {pressureAmpFaultTable.columns.map((column) => (
+                      <View
+                        key={column}
+                        style={[styles.faultTableCell, styles.faultTableHeaderCell]}
+                      >
+                        <Text style={styles.faultTableHeaderText}>{column}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  {pressureAmpFaultTable.rows.map((row, rowIndex) => (
+                    <View
+                      key={row.label}
+                      style={[
+                        styles.faultTableRow,
+                        rowIndex % 2 === 0 && styles.faultTableAltRow,
+                      ]}
+                    >
+                      <View
+                        style={[styles.faultTableCell, styles.faultTableLabelCell]}
+                      >
+                        <Text style={styles.faultTableLabelText}>
+                          {row.label}
+                        </Text>
+                      </View>
+                      {row.values.map((value, valueIndex) => (
+                        <View
+                          key={`${row.label}-${valueIndex}`}
+                          style={styles.faultTableCell}
+                        >
+                          <Text
+                            style={[
+                              styles.faultTableValueText,
+                              value === "عالي" && styles.faultTableHighText,
+                            ]}
+                          >
+                            {value}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+              <Text style={styles.faultTableNote}>
+                المؤشر غير ثابت؛ استخدم الجدول كمرجع مساعد مع درجة الحرارة والحمل
+                وبيانات الجهاز.
+              </Text>
+            </View>
             <View
               style={[
                 styles.fieldGuideSection,
@@ -3704,39 +3766,7 @@ export default function SectionScreen() {
                     </Pressable>
                     {isOpen && (
                       <View style={styles.fieldGuideBody}>
-                        {isPressureGuide && (
-                          <View style={styles.faultTableWrap}>
-                            <Text style={styles.faultTableTitle}>مؤشرات الضغط والأمبير</Text>
-                            <ScrollView horizontal showsHorizontalScrollIndicator>
-                              <View style={styles.faultTable}>
-                                <View style={styles.faultTableRow}>
-                                  <View style={[styles.faultTableCell, styles.faultTableLabelCell, styles.faultTableHeaderCell]}>
-                                    <Text style={styles.faultTableHeaderText}>المؤشر</Text>
-                                  </View>
-                                  {pressureAmpFaultTable.columns.map((column) => (
-                                    <View key={column} style={[styles.faultTableCell, styles.faultTableHeaderCell]}>
-                                      <Text style={styles.faultTableHeaderText}>{column}</Text>
-                                    </View>
-                                  ))}
-                                </View>
-                                {pressureAmpFaultTable.rows.map((row, rowIndex) => (
-                                  <View key={row.label} style={[styles.faultTableRow, rowIndex % 2 === 0 && styles.faultTableAltRow]}>
-                                    <View style={[styles.faultTableCell, styles.faultTableLabelCell]}>
-                                      <Text style={styles.faultTableLabelText}>{row.label}</Text>
-                                    </View>
-                                    {row.values.map((value, valueIndex) => (
-                                      <View key={`${row.label}-${valueIndex}`} style={styles.faultTableCell}>
-                                        <Text style={[styles.faultTableValueText, value === "عالي" && styles.faultTableHighText]}>{value}</Text>
-                                      </View>
-                                    ))}
-                                  </View>
-                                ))}
-                              </View>
-                            </ScrollView>
-                            <Text style={styles.faultTableNote}>المؤشر غير ثابت؛ استخدم الجدول كمرجع مساعد مع درجة الحرارة والحمل وبيانات الجهاز.</Text>
-                          </View>
-                        )}
-                        {!isPressureGuide && (
+                        {(
                           <>
                             <Text
                               style={[styles.fieldGuideLabel, { color: "#9A5B00" }]}
