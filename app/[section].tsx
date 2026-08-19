@@ -1504,6 +1504,31 @@ export default function SectionScreen() {
                 <View style={[styles.ptResult, { backgroundColor: "#FFF7ED", borderColor: "#F97316" }]}><Text style={[styles.ptResultTitle, { color: "#9A3412" }]}>Condenser Split</Text><Text style={[styles.ptResultValue, { color: "#7C2D12" }]}>{formatMeasurement(ptCondenserSplit)}</Text></View>
               </View>
               <Text style={[styles.ptHint, { color: colors.muted }]}>المعادلة: Superheat = حرارة خط السحب − تشبع السحب، وSubcooling = تشبع السائل − حرارة خط السائل، وCondenser Split = هواء الخروج − الجو.</Text>
+              <View style={[styles.ptReference, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+                <Text style={[styles.ptReferenceTitle, { color: colors.foreground }]}>الجدول المرجعي للضغط ودرجة الحرارة</Text>
+                <Text style={[styles.ptReferenceNote, { color: colors.muted }]}>القيم بالضغط Gauge (PSIG)، ودرجة الحرارة بالفهرنهايت والمئوية.</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={styles.ptReferenceScroll}>
+                  <View style={styles.ptTable}>
+                    <View style={styles.ptTableRow}>
+                      {['°F', '°C', 'R-22', 'R-410A', 'R-407C', 'R-134a', 'R-404A'].map((label) => (
+                        <Text key={label} style={[styles.ptTableCell, styles.ptTableHeader, { color: '#0F172A', backgroundColor: '#BAE6FD' }]}>{label}</Text>
+                      ))}
+                    </View>
+                    {Array.from(new Set(Object.values(ptTables).flatMap((table) => table.map((point) => point.tempC))))
+                      .sort((a, b) => a - b)
+                      .map((tempC) => (
+                        <View key={`pt-row-${tempC}`} style={styles.ptTableRow}>
+                          <Text style={[styles.ptTableCell, { color: colors.foreground }]}>{(tempC * 9 / 5 + 32).toFixed(0)}</Text>
+                          <Text style={[styles.ptTableCell, { color: colors.foreground }]}>{tempC.toFixed(1)}</Text>
+                          {(['r22', 'r410a', 'r407c', 'r134a', 'r404a'] as const).map((id) => {
+                            const point = ptTables[id].find((item) => Math.abs(item.tempC - tempC) < 0.05);
+                            return <Text key={`${id}-${tempC}`} style={[styles.ptTableCell, { color: point ? colors.foreground : colors.muted }]}>{point ? point.psig.toFixed(1) : '—'}</Text>;
+                          })}
+                        </View>
+                      ))}
+                  </View>
+                </ScrollView>
+              </View>
             </View>
     );
     if (key === "pt-calculator") {
@@ -4486,6 +4511,14 @@ const styles = StyleSheet.create({
   ptResultTitle: { fontSize: 12, fontWeight: "900", textAlign: "right" },
   ptResultValue: { fontSize: 16, fontWeight: "900" },
   ptHint: { fontSize: 10, lineHeight: 17, textAlign: "right", marginTop: 10 },
+  ptReference: { borderWidth: 1, borderRadius: 12, marginTop: 14, padding: 8, overflow: "hidden" },
+  ptReferenceTitle: { fontSize: 13, fontWeight: "900", textAlign: "right", marginBottom: 3 },
+  ptReferenceNote: { fontSize: 10, lineHeight: 16, textAlign: "right", marginBottom: 8 },
+  ptReferenceScroll: { paddingBottom: 2 },
+  ptTable: { minWidth: 520, borderWidth: 1, borderColor: "#64748B", borderRadius: 6, overflow: "hidden" },
+  ptTableRow: { flexDirection: "row", minHeight: 29, borderBottomWidth: 1, borderBottomColor: "#CBD5E1" },
+  ptTableCell: { width: 72, paddingHorizontal: 5, paddingVertical: 6, textAlign: "center", fontSize: 10, fontWeight: "800", borderRightWidth: 1, borderRightColor: "#CBD5E1" },
+  ptTableHeader: { fontWeight: "900" },
   floatingAdd: {
     width: 64,
     height: 64,
