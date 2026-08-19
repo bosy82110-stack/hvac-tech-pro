@@ -2540,24 +2540,24 @@ export default function SectionScreen() {
                 ]}
               >
                 <Text
-                  style={[styles.detailsTitle, { color: colors.foreground }]}
+                  style={[styles.detailsTitle, { color: colors.primary }]}
                 >
                   تفاصيل كود العطل {selectedError.code}
                 </Text>
-                <Text style={[styles.detailsRow, { color: colors.foreground }]}>
+                <Text style={[styles.detailsRow, { color: colors.primary }]}>
                   نوع الجهاز: {selectedError.type}
                 </Text>
-                <Text style={[styles.detailsRow, { color: colors.foreground }]}>
+                <Text style={[styles.detailsRow, { color: colors.primary }]}>
                   الماركة: {selectedError.brand}
                 </Text>
-                <Text style={[styles.detailsRow, { color: colors.foreground }]}>
+                <Text style={[styles.detailsRow, { color: colors.primary }]}>
                   الموديلات: {selectedError.models?.length ? selectedError.models.map((modelName) => `${modelName}\n`).join('') : selectedError.model}
                 </Text>
-                <Text style={[styles.detailsRow, { color: colors.foreground }]}>
+                <Text style={[styles.detailsRow, { color: colors.primary }]}>
                   نوع التشغيل: {selectedError.drive}
                 </Text>
-                {selectedError.roomReceiverCode ? <Text style={[styles.detailsRow, { color: colors.foreground }]}>كود رسيفر الغرفة: {selectedError.roomReceiverCode}</Text> : null}
-                {selectedError.deviceReceiverCode ? <Text style={[styles.detailsRow, { color: colors.foreground }]}>كود رسيفر الجهاز: {selectedError.deviceReceiverCode}</Text> : null}
+                {selectedError.roomReceiverCode ? <Text style={[styles.detailsRow, { color: colors.primary }]}>كود رسيفر الغرفة: {selectedError.roomReceiverCode}</Text> : null}
+                {selectedError.deviceReceiverCode ? <Text style={[styles.detailsRow, { color: colors.primary }]}>كود رسيفر الجهاز: {selectedError.deviceReceiverCode}</Text> : null}
                 <Text style={[styles.detailsLabel, { color: colors.primary }]}>
                   وصف العطل
                 </Text>
