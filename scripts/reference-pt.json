@@ -1,0 +1,1442 @@
+[
+  {
+    "tempF": -60.0,
+    "tempC": -51.1,
+    "r22": 11.9,
+    "r410a": 0.9,
+    "r407c": 16.0,
+    "r134a": 21.6,
+    "r404a": null,
+    "vacuum": [
+      true,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -55.0,
+    "tempC": -48.3,
+    "r22": 9.2,
+    "r410a": 1.8,
+    "r407c": 13.7,
+    "r134a": 20.2,
+    "r404a": null,
+    "vacuum": [
+      true,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -50.0,
+    "tempC": -45.6,
+    "r22": 6.1,
+    "r410a": 4.3,
+    "r407c": 11.1,
+    "r134a": 18.6,
+    "r404a": null,
+    "vacuum": [
+      true,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -45.0,
+    "tempC": -42.8,
+    "r22": 2.7,
+    "r410a": 7.0,
+    "r407c": 8.1,
+    "r134a": 16.7,
+    "r404a": null,
+    "vacuum": [
+      true,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -40.0,
+    "tempC": -40.0,
+    "r22": 0.6,
+    "r410a": 10.1,
+    "r407c": 4.8,
+    "r134a": 14.7,
+    "r404a": 4.9,
+    "vacuum": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -35.0,
+    "tempC": -37.2,
+    "r22": 2.6,
+    "r410a": 13.5,
+    "r407c": 1.1,
+    "r134a": 12.3,
+    "r404a": 7.5,
+    "vacuum": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -30.0,
+    "tempC": -34.4,
+    "r22": 4.9,
+    "r410a": 17.2,
+    "r407c": 1.5,
+    "r134a": 9.7,
+    "r404a": 10.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -25.0,
+    "tempC": -31.7,
+    "r22": 7.5,
+    "r410a": 21.4,
+    "r407c": 3.7,
+    "r134a": 6.8,
+    "r404a": 13.5,
+    "vacuum": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -20.0,
+    "tempC": -28.9,
+    "r22": 10.2,
+    "r410a": 25.9,
+    "r407c": 6.2,
+    "r134a": 3.6,
+    "r404a": 16.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -18.0,
+    "tempC": -27.8,
+    "r22": 11.4,
+    "r410a": 27.8,
+    "r407c": 7.2,
+    "r134a": 2.2,
+    "r404a": 18.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -16.0,
+    "tempC": -26.7,
+    "r22": 12.6,
+    "r410a": 29.7,
+    "r407c": 8.4,
+    "r134a": 0.7,
+    "r404a": 19.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "tempF": -14.0,
+    "tempC": -25.6,
+    "r22": 13.9,
+    "r410a": 31.8,
+    "r407c": 9.5,
+    "r134a": 0.4,
+    "r404a": 21.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": -12.0,
+    "tempC": -24.4,
+    "r22": 15.2,
+    "r410a": 33.9,
+    "r407c": 10.7,
+    "r134a": 1.2,
+    "r404a": 22.9,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": -10.0,
+    "tempC": -23.3,
+    "r22": 16.5,
+    "r410a": 36.1,
+    "r407c": 11.9,
+    "r134a": 2.0,
+    "r404a": 24.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": -8.0,
+    "tempC": -22.2,
+    "r22": 17.9,
+    "r410a": 38.4,
+    "r407c": 13.2,
+    "r134a": 2.8,
+    "r404a": 26.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": -6.0,
+    "tempC": -21.1,
+    "r22": 19.4,
+    "r410a": 40.7,
+    "r407c": 14.6,
+    "r134a": 3.7,
+    "r404a": 28.0,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": -4.0,
+    "tempC": -20.0,
+    "r22": 20.9,
+    "r410a": 43.1,
+    "r407c": 15.9,
+    "r134a": 4.6,
+    "r404a": 29.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": -2.0,
+    "tempC": -18.9,
+    "r22": 22.4,
+    "r410a": 45.6,
+    "r407c": 17.4,
+    "r134a": 5.5,
+    "r404a": 31.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": -0.0,
+    "tempC": -17.8,
+    "r22": 24.0,
+    "r410a": 48.2,
+    "r407c": 18.9,
+    "r134a": 6.5,
+    "r404a": 33.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 1.0,
+    "tempC": -17.2,
+    "r22": 24.8,
+    "r410a": 49.5,
+    "r407c": 19.6,
+    "r134a": 7.0,
+    "r404a": 34.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 2.0,
+    "tempC": -16.7,
+    "r22": 25.7,
+    "r410a": 50.9,
+    "r407c": 20.4,
+    "r134a": 7.5,
+    "r404a": 35.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 3.0,
+    "tempC": -16.1,
+    "r22": 26.5,
+    "r410a": 52.2,
+    "r407c": 21.2,
+    "r134a": 8.0,
+    "r404a": 36.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 4.0,
+    "tempC": -15.6,
+    "r22": 27.4,
+    "r410a": 53.6,
+    "r407c": 22.0,
+    "r134a": 8.6,
+    "r404a": 37.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 5.0,
+    "tempC": -15.0,
+    "r22": 28.3,
+    "r410a": 55.0,
+    "r407c": 22.8,
+    "r134a": 9.1,
+    "r404a": 38.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 6.0,
+    "tempC": -14.4,
+    "r22": 29.1,
+    "r410a": 56.4,
+    "r407c": 23.7,
+    "r134a": 9.7,
+    "r404a": 39.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 7.0,
+    "tempC": -13.9,
+    "r22": 30.0,
+    "r410a": 57.9,
+    "r407c": 24.5,
+    "r134a": 10.2,
+    "r404a": 40.9,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 8.0,
+    "tempC": -13.3,
+    "r22": 31.0,
+    "r410a": 59.3,
+    "r407c": 25.4,
+    "r134a": 10.8,
+    "r404a": 42.0,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 9.0,
+    "tempC": -12.8,
+    "r22": 31.9,
+    "r410a": 60.8,
+    "r407c": 26.2,
+    "r134a": 11.4,
+    "r404a": 43.1,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 10.0,
+    "tempC": -12.2,
+    "r22": 32.8,
+    "r410a": 62.3,
+    "r407c": 27.1,
+    "r134a": 12.0,
+    "r404a": 44.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 11.0,
+    "tempC": -11.7,
+    "r22": 33.8,
+    "r410a": 63.9,
+    "r407c": 28.0,
+    "r134a": 12.6,
+    "r404a": 45.4,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 12.0,
+    "tempC": -11.1,
+    "r22": 34.8,
+    "r410a": 65.4,
+    "r407c": 29.0,
+    "r134a": 13.2,
+    "r404a": 46.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 13.0,
+    "tempC": -10.6,
+    "r22": 35.8,
+    "r410a": 67.0,
+    "r407c": 29.9,
+    "r134a": 13.8,
+    "r404a": 47.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 14.0,
+    "tempC": -10.0,
+    "r22": 36.8,
+    "r410a": 68.6,
+    "r407c": 30.9,
+    "r134a": 14.4,
+    "r404a": 49.0,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 15.0,
+    "tempC": -9.4,
+    "r22": 37.8,
+    "r410a": 70.2,
+    "r407c": 31.8,
+    "r134a": 15.1,
+    "r404a": 50.2,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 16.0,
+    "tempC": -8.9,
+    "r22": 38.8,
+    "r410a": 71.9,
+    "r407c": 32.8,
+    "r134a": 15.7,
+    "r404a": 51.5,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 17.0,
+    "tempC": -8.3,
+    "r22": 39.9,
+    "r410a": 73.5,
+    "r407c": 33.8,
+    "r134a": 16.4,
+    "r404a": 52.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 18.0,
+    "tempC": -7.8,
+    "r22": 40.9,
+    "r410a": 75.2,
+    "r407c": 34.8,
+    "r134a": 17.1,
+    "r404a": 54.0,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 19.0,
+    "tempC": -7.2,
+    "r22": 42.0,
+    "r410a": 77.0,
+    "r407c": 35.9,
+    "r134a": 17.7,
+    "r404a": 55.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 20.0,
+    "tempC": -6.7,
+    "r22": 43.1,
+    "r410a": 78.7,
+    "r407c": 36.9,
+    "r134a": 18.4,
+    "r404a": 56.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 21.0,
+    "tempC": -6.1,
+    "r22": 44.2,
+    "r410a": 80.5,
+    "r407c": 38.0,
+    "r134a": 19.2,
+    "r404a": 57.9,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 22.0,
+    "tempC": -5.6,
+    "r22": 45.3,
+    "r410a": 82.3,
+    "r407c": 39.1,
+    "r134a": 19.9,
+    "r404a": 59.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 23.0,
+    "tempC": -5.0,
+    "r22": 46.5,
+    "r410a": 84.1,
+    "r407c": 40.2,
+    "r134a": 20.6,
+    "r404a": 60.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 24.0,
+    "tempC": -4.4,
+    "r22": 47.6,
+    "r410a": 85.9,
+    "r407c": 41.3,
+    "r134a": 21.4,
+    "r404a": 62.0,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 25.0,
+    "tempC": -3.9,
+    "r22": 48.8,
+    "r410a": 87.8,
+    "r407c": 42.4,
+    "r134a": 22.1,
+    "r404a": 63.4,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 26.0,
+    "tempC": -3.3,
+    "r22": 50.0,
+    "r410a": 89.7,
+    "r407c": 43.6,
+    "r134a": 22.9,
+    "r404a": 64.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 27.0,
+    "tempC": -2.8,
+    "r22": 51.2,
+    "r410a": 91.6,
+    "r407c": 44.7,
+    "r134a": 23.7,
+    "r404a": 66.2,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 28.0,
+    "tempC": -2.2,
+    "r22": 52.4,
+    "r410a": 93.5,
+    "r407c": 45.9,
+    "r134a": 24.5,
+    "r404a": 67.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 29.0,
+    "tempC": -1.7,
+    "r22": 53.7,
+    "r410a": 95.5,
+    "r407c": 47.1,
+    "r134a": 25.3,
+    "r404a": 69.2,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 30.0,
+    "tempC": -1.1,
+    "r22": 54.9,
+    "r410a": 97.5,
+    "r407c": 48.4,
+    "r134a": 26.1,
+    "r404a": 70.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 31.0,
+    "tempC": -0.6,
+    "r22": 56.2,
+    "r410a": 99.5,
+    "r407c": 49.6,
+    "r134a": 26.9,
+    "r404a": 72.1,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 32.0,
+    "tempC": 0.0,
+    "r22": 57.5,
+    "r410a": 101.6,
+    "r407c": 50.9,
+    "r134a": 27.8,
+    "r404a": 73.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 33.0,
+    "tempC": 0.6,
+    "r22": 58.8,
+    "r410a": 103.6,
+    "r407c": 52.1,
+    "r134a": 28.6,
+    "r404a": 75.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 34.0,
+    "tempC": 1.1,
+    "r22": 60.2,
+    "r410a": 105.7,
+    "r407c": 53.4,
+    "r134a": 29.5,
+    "r404a": 76.9,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 35.0,
+    "tempC": 1.7,
+    "r22": 61.5,
+    "r410a": 107.9,
+    "r407c": 54.8,
+    "r134a": 30.4,
+    "r404a": 78.5,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 36.0,
+    "tempC": 2.2,
+    "r22": 62.9,
+    "r410a": 110.0,
+    "r407c": 56.1,
+    "r134a": 31.3,
+    "r404a": 80.2,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 37.0,
+    "tempC": 2.8,
+    "r22": 64.3,
+    "r410a": 112.2,
+    "r407c": 57.5,
+    "r134a": 32.2,
+    "r404a": 81.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 38.0,
+    "tempC": 3.3,
+    "r22": 65.7,
+    "r410a": 114.4,
+    "r407c": 58.9,
+    "r134a": 33.1,
+    "r404a": 83.5,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 39.0,
+    "tempC": 3.9,
+    "r22": 67.1,
+    "r410a": 116.7,
+    "r407c": 60.3,
+    "r134a": 34.1,
+    "r404a": 85.2,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 40.0,
+    "tempC": 4.4,
+    "r22": 68.6,
+    "r410a": 118.9,
+    "r407c": 61.7,
+    "r134a": 35.0,
+    "r404a": 86.9,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 41.0,
+    "tempC": 5.0,
+    "r22": 70.0,
+    "r410a": 121.8,
+    "r407c": 63.1,
+    "r134a": 36.0,
+    "r404a": 88.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 42.0,
+    "tempC": 5.6,
+    "r22": 71.5,
+    "r410a": 123.6,
+    "r407c": 64.6,
+    "r134a": 37.0,
+    "r404a": 90.4,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 43.0,
+    "tempC": 6.1,
+    "r22": 73.0,
+    "r410a": 125.9,
+    "r407c": 66.1,
+    "r134a": 38.0,
+    "r404a": 92.2,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 44.0,
+    "tempC": 6.7,
+    "r22": 74.5,
+    "r410a": 128.3,
+    "r407c": 67.6,
+    "r134a": 39.0,
+    "r404a": 94.0,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 45.0,
+    "tempC": 7.2,
+    "r22": 76.1,
+    "r410a": 130.7,
+    "r407c": 69.1,
+    "r134a": 40.0,
+    "r404a": 95.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 46.0,
+    "tempC": 7.8,
+    "r22": 77.6,
+    "r410a": 133.2,
+    "r407c": 70.6,
+    "r134a": 41.1,
+    "r404a": 97.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 47.0,
+    "tempC": 8.3,
+    "r22": 79.2,
+    "r410a": 135.6,
+    "r407c": 72.2,
+    "r134a": 42.2,
+    "r404a": 99.5,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 48.0,
+    "tempC": 8.9,
+    "r22": 80.8,
+    "r410a": 138.2,
+    "r407c": 73.8,
+    "r134a": 43.2,
+    "r404a": 101.4,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 49.0,
+    "tempC": 9.4,
+    "r22": 82.4,
+    "r410a": 140.7,
+    "r407c": 75.4,
+    "r134a": 44.3,
+    "r404a": 103.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 50.0,
+    "tempC": 10.0,
+    "r22": 84.1,
+    "r410a": 143.3,
+    "r407c": 77.1,
+    "r134a": 45.4,
+    "r404a": 105.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 55.0,
+    "tempC": 12.8,
+    "r22": 92.6,
+    "r410a": 156.6,
+    "r407c": 106.0,
+    "r134a": 51.2,
+    "r404a": 115.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 60.0,
+    "tempC": 15.6,
+    "r22": 101.6,
+    "r410a": 170.7,
+    "r407c": 116.2,
+    "r134a": 57.4,
+    "r404a": 126.0,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 65.0,
+    "tempC": 18.3,
+    "r22": 111.3,
+    "r410a": 185.7,
+    "r407c": 127.0,
+    "r134a": 64.0,
+    "r404a": 137.4,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 70.0,
+    "tempC": 21.1,
+    "r22": 121.5,
+    "r410a": 201.5,
+    "r407c": 138.5,
+    "r134a": 71.1,
+    "r404a": 149.3,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 75.0,
+    "tempC": 23.9,
+    "r22": 132.2,
+    "r410a": 218.2,
+    "r407c": 150.6,
+    "r134a": 78.6,
+    "r404a": 161.9,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 80.0,
+    "tempC": 26.7,
+    "r22": 143.7,
+    "r410a": 235.9,
+    "r407c": 163.5,
+    "r134a": 86.7,
+    "r404a": 175.4,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 85.0,
+    "tempC": 29.4,
+    "r22": 155.7,
+    "r410a": 254.6,
+    "r407c": 177.0,
+    "r134a": 95.2,
+    "r404a": 189.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 90.0,
+    "tempC": 32.2,
+    "r22": 168.4,
+    "r410a": 274.3,
+    "r407c": 191.3,
+    "r134a": 104.3,
+    "r404a": 204.5,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 95.0,
+    "tempC": 35.0,
+    "r22": 181.9,
+    "r410a": 295.0,
+    "r407c": 206.4,
+    "r134a": 113.9,
+    "r404a": 220.2,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 100.0,
+    "tempC": 37.8,
+    "r22": 196.0,
+    "r410a": 316.9,
+    "r407c": 222.3,
+    "r134a": 124.1,
+    "r404a": 236.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 105.0,
+    "tempC": 40.6,
+    "r22": 210.8,
+    "r410a": 339.9,
+    "r407c": 239.0,
+    "r134a": 134.9,
+    "r404a": 254.2,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 110.0,
+    "tempC": 43.3,
+    "r22": 226.4,
+    "r410a": 364.1,
+    "r407c": 256.5,
+    "r134a": 146.3,
+    "r404a": 272.5,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 115.0,
+    "tempC": 46.1,
+    "r22": 242.8,
+    "r410a": 289.6,
+    "r407c": 274.9,
+    "r134a": 158.4,
+    "r404a": 291.9,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 120.0,
+    "tempC": 48.9,
+    "r22": 260.0,
+    "r410a": 416.4,
+    "r407c": 294.2,
+    "r134a": 171.1,
+    "r404a": 312.1,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 125.0,
+    "tempC": 51.7,
+    "r22": 278.1,
+    "r410a": 444.5,
+    "r407c": 314.5,
+    "r134a": 184.5,
+    "r404a": 333.4,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 130.0,
+    "tempC": 54.4,
+    "r22": 297.0,
+    "r410a": 474.0,
+    "r407c": 335.7,
+    "r134a": 198.7,
+    "r404a": 355.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 135.0,
+    "tempC": 57.2,
+    "r22": 316.7,
+    "r410a": 505.0,
+    "r407c": 357.8,
+    "r134a": 213.5,
+    "r404a": 379.1,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 140.0,
+    "tempC": 60.0,
+    "r22": 337.4,
+    "r410a": 537.6,
+    "r407c": 380.9,
+    "r134a": 229.2,
+    "r404a": 403.7,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 145.0,
+    "tempC": 62.8,
+    "r22": 359.1,
+    "r410a": 571.7,
+    "r407c": 405.1,
+    "r134a": 245.6,
+    "r404a": 429.6,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 150.0,
+    "tempC": 65.6,
+    "r22": 381.7,
+    "r410a": 607.6,
+    "r407c": 430.3,
+    "r134a": 262.8,
+    "r404a": 456.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "tempF": 155.0,
+    "tempC": 68.3,
+    "r22": 405.4,
+    "r410a": 645.2,
+    "r407c": 456.6,
+    "r134a": 281.0,
+    "r404a": 484.8,
+    "vacuum": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  }
+]
