@@ -518,7 +518,7 @@ export default function SectionScreen() {
     ])
       .then(([diagnosesValue, errorsValue, brandsValue, materialsValue]) => {
         if (diagnosesValue) setSavedDiagnoses(JSON.parse(diagnosesValue));
-        if (errorsValue) setCustomErrorCodes(JSON.parse(errorsValue));
+        if (errorsValue) { const loadedErrors = JSON.parse(errorsValue) as CustomErrorCode[]; const cleanedErrors = loadedErrors.map((item) => { const models = getCustomErrorModels(item); return { ...item, models, model: models.join('، ') }; }); setCustomErrorCodes(cleanedErrors); AsyncStorage.setItem('hvac_custom_error_codes', JSON.stringify(cleanedErrors)).catch(() => undefined); }
         if (brandsValue) setManagedBrands(JSON.parse(brandsValue));
         if (materialsValue) setCustomMaterials(JSON.parse(materialsValue));
       })
@@ -538,7 +538,7 @@ export default function SectionScreen() {
     ).catch(() => undefined);
   }, [orderItems]);
   const normalizedQuery = query.trim().toLowerCase();
-  const getCustomErrorModels = (item: CustomErrorCode) => Array.from(new Set([...(item.models ?? []), ...(item.model ? [item.model] : [])].map((value) => value.trim()).filter(Boolean)));
+  const getCustomErrorModels = (item: CustomErrorCode) => { const source = item.models?.length ? item.models : (item.model ?? '').split(/[،,]/); return Array.from(new Set(source.map((value) => value.trim()).filter(Boolean))); };
   const getCompressorByKey = (key: string | null) =>
     key
       ? compressorModels.find(
@@ -2516,7 +2516,7 @@ export default function SectionScreen() {
                     {item.brand} · {item.problem}
                   </Text>
                   <Text style={[styles.cardSub, { color: colors.muted }]}>
-                    {item.models?.length ? item.models.join('، ') : item.model} · {item.drive} · {item.type}
+                    {item.models?.length ? item.models.join('\n') : item.model} · {item.drive} · {item.type}
                   </Text>
                   <Text style={[styles.note, { color: colors.muted }]}>
                     اضغط لعرض كل التفاصيل
@@ -2551,7 +2551,7 @@ export default function SectionScreen() {
                   الماركة: {selectedError.brand}
                 </Text>
                 <Text style={[styles.detailsRow, { color: colors.foreground }]}>
-                  الموديلات: {selectedError.models?.length ? selectedError.models.join('، ') : selectedError.model}
+                  الموديلات: {selectedError.models?.length ? selectedError.models.map((modelName) => `${modelName}\n`).join('') : selectedError.model}
                 </Text>
                 <Text style={[styles.detailsRow, { color: colors.foreground }]}>
                   نوع التشغيل: {selectedError.drive}

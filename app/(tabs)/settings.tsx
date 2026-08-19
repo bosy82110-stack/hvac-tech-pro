@@ -48,9 +48,9 @@ const carrierDeviceReceiverFaults = [
   ['F8', 'خطأ اتصال بين شريحتي الوحدة الداخلية', 'افحص كابل الاتصال والفيش والجهد المرجعي بين اللوحتين ثم أصلح أو استبدل الكابل.'],
 ] as const;
 const normalizeModelName = (value: string) => value.trim().replace(/\s*[-–]?\s*(?:كونسيلد|بارد\/ساخن\/إنفرتر|بارد\/ساخن|بارد|ساخن|إنفرتر)\b.*$/i, '').trim();
-const getErrorModels = (item: CustomErrorCode) => Array.from(new Set([...(item.models ?? []), ...(item.model ? [item.model] : [])].map((value) => normalizeModelName(value)).filter(Boolean)));
+const getErrorModels = (item: CustomErrorCode) => { const source = item.models?.length ? item.models : (item.model ?? '').split(/[،,]/); return Array.from(new Set(source.map((value) => normalizeModelName(value)).filter(Boolean))); };
 const errorSignature = (item: CustomErrorCode) => [item.type, item.code, item.brand, item.drive, item.roomReceiverCode ?? '', item.deviceReceiverCode ?? '', getErrorModels(item).sort().join('||'), item.problem.trim(), item.solution.trim()].join('|');
-const dedupeErrorCodes = (items: CustomErrorCode[]) => items.filter((item, index, list) => list.findIndex((candidate) => errorSignature(candidate) === errorSignature(item)) === index);
+const normalizeErrorRecord = (item: CustomErrorCode): CustomErrorCode => { const models = getErrorModels(item); return { ...item, models, model: models.join('، ') }; }; const dedupeErrorCodes = (items: CustomErrorCode[]) => items.map(normalizeErrorRecord).filter((item, index, list) => list.findIndex((candidate) => errorSignature(candidate) === errorSignature(item)) === index);
 const deviceTypes: HvacDeviceType[] = ['سبليت', 'مركزي', 'غرف تبريد', 'VRF', 'كونسيلد'];
 const driveTypes: CustomErrorCode['drive'][] = ['عادي', 'إنفرتر'];
 
@@ -151,7 +151,7 @@ export default function SettingsScreen() {
 
   const saveError = async () => {
     if (!code.trim() && !roomReceiverCode.trim() && !deviceReceiverCode.trim()) { Alert.alert('تنبيه', 'أدخل كود عطل واحدًا على الأقل'); return; }
-    const normalizedModels = Array.from(new Set([...selectedModels, ...(model.trim() && selectedModels.length === 0 ? [model.trim()] : [])]));
+    const normalizedModels = Array.from(new Set((selectedModels.length ? selectedModels : (model.trim() ? model.split(/[،,]/) : [])).map((value) => normalizeModelName(value)).filter(Boolean)));
     const item: CustomErrorCode = { id: editingId ?? Date.now().toString(), type, code: code.trim().toUpperCase(), brand: brand.trim(), model: normalizedModels.join('، '), models: normalizedModels, drive, roomReceiverCode: roomReceiverCode.trim() || undefined, deviceReceiverCode: deviceReceiverCode.trim() || undefined, problem: problem.trim(), solution: solution.trim(), createdAt: Date.now() };
     const updated = dedupeErrorCodes(editingId ? errorCodes.map((x) => x.id === editingId ? item : x) : [item, ...errorCodes]);
     await AsyncStorage.setItem(ERROR_KEY, JSON.stringify(updated)); setErrorCodes(updated); setModalVisible(false); resetForm();
