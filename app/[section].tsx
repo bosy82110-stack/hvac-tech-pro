@@ -42,6 +42,15 @@ type MaterialRecord = CustomMaterial & {
   detail: string;
 };
 
+const pressureAmpFaultTable = {
+  columns: ["زيادة الشحنة", "نقص الشحنة", "السدد", "اتساخ المبخر", "اتساخ المكثف", "هواء بالدائرة"],
+  rows: [
+    { label: "ضغط الطرد", values: ["عالي", "منخفض", "منخفض", "منخفض", "عالي", "عالي"] },
+    { label: "ضغط السحب", values: ["عالي", "منخفض", "منخفض", "منخفض", "عالي", "عالي"] },
+    { label: "الأمبير", values: ["عالي", "منخفض", "عالي", "منخفض", "عالي", "عالي"] },
+  ],
+} as const;
+
 const compressorWorkbookGuidance = [
   "راجع القدرة المطلوبة أكثر من مرة قبل اعتمادها في العمل.",
   "البيانات مستخرجة في الغالب من كتالوجات الشركات، وبعضها جُمِع من مصادر فنية عند صعوبة الوصول إلى الكتالوج.",
@@ -3695,6 +3704,38 @@ export default function SectionScreen() {
                     </Pressable>
                     {isOpen && (
                       <View style={styles.fieldGuideBody}>
+                        {isPressureGuide && (
+                          <View style={styles.faultTableWrap}>
+                            <Text style={styles.faultTableTitle}>مؤشرات الضغط والأمبير</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator>
+                              <View style={styles.faultTable}>
+                                <View style={styles.faultTableRow}>
+                                  <View style={[styles.faultTableCell, styles.faultTableLabelCell, styles.faultTableHeaderCell]}>
+                                    <Text style={styles.faultTableHeaderText}>المؤشر</Text>
+                                  </View>
+                                  {pressureAmpFaultTable.columns.map((column) => (
+                                    <View key={column} style={[styles.faultTableCell, styles.faultTableHeaderCell]}>
+                                      <Text style={styles.faultTableHeaderText}>{column}</Text>
+                                    </View>
+                                  ))}
+                                </View>
+                                {pressureAmpFaultTable.rows.map((row, rowIndex) => (
+                                  <View key={row.label} style={[styles.faultTableRow, rowIndex % 2 === 0 && styles.faultTableAltRow]}>
+                                    <View style={[styles.faultTableCell, styles.faultTableLabelCell]}>
+                                      <Text style={styles.faultTableLabelText}>{row.label}</Text>
+                                    </View>
+                                    {row.values.map((value, valueIndex) => (
+                                      <View key={`${row.label}-${valueIndex}`} style={styles.faultTableCell}>
+                                        <Text style={[styles.faultTableValueText, value === "عالي" && styles.faultTableHighText]}>{value}</Text>
+                                      </View>
+                                    ))}
+                                  </View>
+                                ))}
+                              </View>
+                            </ScrollView>
+                            <Text style={styles.faultTableNote}>المؤشر غير ثابت؛ استخدم الجدول كمرجع مساعد مع درجة الحرارة والحمل وبيانات الجهاز.</Text>
+                          </View>
+                        )}
                         {!isPressureGuide && (
                           <>
                             <Text
@@ -4438,6 +4479,80 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 11,
     fontWeight: "700",
+  },
+  faultTableWrap: {
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#6AA4D8",
+    borderRadius: 10,
+    padding: 6,
+    marginBottom: 10,
+  },
+  faultTableTitle: {
+    color: "#123D70",
+    fontSize: 15,
+    fontWeight: "900",
+    textAlign: "right",
+    marginBottom: 6,
+  },
+  faultTable: {
+    minWidth: 720,
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
+  },
+  faultTableRow: {
+    flexDirection: "row-reverse",
+    minHeight: 48,
+  },
+  faultTableAltRow: {
+    backgroundColor: "#E2E8F5",
+  },
+  faultTableCell: {
+    width: 108,
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderLeftWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#FFFFFF",
+    backgroundColor: "#F1F5FB",
+  },
+  faultTableLabelCell: {
+    width: 92,
+    backgroundColor: "#5B9BD5",
+  },
+  faultTableHeaderCell: {
+    backgroundColor: "#5B9BD5",
+    minHeight: 62,
+  },
+  faultTableHeaderText: {
+    color: "#123D70",
+    fontSize: 11,
+    fontWeight: "900",
+    textAlign: "center",
+  },
+  faultTableLabelText: {
+    color: "#123D70",
+    fontSize: 12,
+    fontWeight: "900",
+    textAlign: "center",
+  },
+  faultTableValueText: {
+    color: "#1F2937",
+    fontSize: 13,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  faultTableHighText: {
+    color: "#D62828",
+    fontWeight: "900",
+  },
+  faultTableNote: {
+    color: "#64748B",
+    fontSize: 11,
+    textAlign: "right",
+    marginTop: 6,
   },
   pipeHeaderText: { color: "#0F172A", fontWeight: "900" },
   pipeNote: { width: "100%", borderRadius: 14, padding: 12, gap: 5 },
