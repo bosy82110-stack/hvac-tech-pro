@@ -17,12 +17,36 @@ import {
 import { useColors } from "@/hooks/use-colors";
 
 const FIELDS = [
-  ["Brand / Manufacturer", "brand", "Brand / Manufacturer", "اسم الشركة المصنعة للجهاز."], ["Model / Model Name", "model", "Model / Model Name", "رقم أو اسم طراز الجهاز."], ["Indoor Unit Model", "indoorModel", "Indoor Unit Model", "طراز الوحدة الداخلية."], ["Outdoor Unit Model", "outdoorModel", "Outdoor Unit Model", "طراز الوحدة الخارجية، وهو الأكثر ظهورًا على اللوحة الخارجية."],
-  ["Serial Number / S/N", "serial", "Serial Number / S/N", "رقم تعريف فريد للجهاز يُستخدم للضمان والصيانة."], ["MFG Date / Date of Manufacture", "manufactureDate", "MFG Date / Date of Manufacture", "تاريخ إنتاج الجهاز."], ["Refrigerant", "refrigerant", "Refrigerant", "نوع وسيط التبريد المستخدم في الدائرة."], ["Capacity / BTU/hr", "btu", "Capacity / BTU/hr", "قدرة الجهاز الحرارية، وغالبًا تكتب بوحدة BTU في الساعة."],
-  ["Cooling Capacity", "coolingCapacity", "Cooling Capacity", "كمية الحرارة التي يستطيع الجهاز سحبها أثناء التبريد."], ["Heating Capacity", "heatingCapacity", "Heating Capacity", "كمية الحرارة التي يضيفها الجهاز أثناء التدفئة."], ["Rated Voltage / Power Supply", "voltage", "Rated Voltage / Power Supply", "الجهد الكهربائي الاسمي المطلوب لتشغيل الجهاز."], ["Phase / Ph", "phase", "Phase / Ph", "عدد الفازات الكهربائية، مثل 1 Ph أو 3 Ph."],
-  ["Rated Frequency", "frequency", "Rated Frequency", "تردد مصدر الكهرباء، ويقاس بالهرتز مثل 50 أو 60 Hz."], ["Cooling Current / Cooling Amps", "coolingCurrent", "Cooling Current / Cooling Amps", "التيار الذي يسحبه الجهاز أثناء وضع التبريد."], ["Heating Current / Heating Amps", "heatingCurrent", "Heating Current / Heating Amps", "التيار الذي يسحبه الجهاز أثناء وضع التدفئة."], ["Current / Rated Current", "ampere", "Current / Rated Current", "قيمة التيار الاسمية أو تيار التشغيل حسب العنوان الموجود على اللوحة."],
-  ["Cooling Power Input", "coolingPower", "Cooling Power Input", "القدرة الكهربائية التي يستهلكها الجهاز أثناء التبريد."], ["Heating Power Input", "heatingPower", "Heating Power Input", "القدرة الكهربائية التي يستهلكها الجهاز أثناء التدفئة."], ["Power Input / Input Power", "power", "Power Input / Input Power", "القدرة الكهربائية الداخلة إلى الجهاز، وتقاس بالواط أو الكيلوواط."], ["EER", "eer", "EER", "نسبة كفاءة التبريد؛ كلما زادت عادةً كان استهلاك التبريد أفضل."], ["COP", "cop", "COP", "معامل أداء التدفئة؛ يقارن قدرة التدفئة بالطاقة الكهربائية المستهلكة."],
-  ["Refrigerant Charge / Quantity", "charge", "Refrigerant Charge / Quantity", "كمية الفريون داخل النظام، وتقاس غالبًا بالجرام أو الكيلوجرام."], ["Max Operating Pressure / Max Pressure", "maxPressure", "Max Operating Pressure / Max Pressure", "أقصى ضغط تصميمي أو مسموح به، وقد يذكر لضغطي الطرد والسحب."], ["IP Rating / Waterproof", "ipRating", "IP Rating / Waterproof", "درجة حماية جسم الجهاز من الماء والأجسام الصلبة، مثل IPX4."], ["Indoor Unit Weight", "indoorWeight", "Indoor Unit Weight", "وزن الوحدة الداخلية."], ["Outdoor Unit Weight", "outdoorWeight", "Outdoor Unit Weight", "وزن الوحدة الخارجية."],
+  ["Model", "model", "Model", "طراز الجهاز كما هو مكتوب على اللوحة."],
+  ["Cooling Capacity", "coolingCapacity", "Cooling Capacity", "قدرة التبريد الاسمية."],
+  ["Heating Capacity", "heatingCapacity", "Heating Capacity", "قدرة التدفئة الاسمية."],
+  ["Refrigerant", "refrigerant", "Refrigerant", "نوع وسيط التبريد."],
+  ["Refrigerant Quantity / Charge", "charge", "Refrigerant Quantity / Charge", "كمية شحنة وسيط التبريد."],
+  ["Rated Voltage", "voltage", "Rated Voltage", "الجهد الاسمي."],
+  ["Phase", "phase", "Phase", "عدد الفازات."],
+  ["Rated Frequency", "frequency", "Rated Frequency", "التردد الاسمي."],
+  ["Rated Cooling Current", "ratedCoolingCurrent", "Rated Cooling Current", "التيار الاسمي أثناء التبريد."],
+  ["Rated Heating Current", "ratedHeatingCurrent", "Rated Heating Current", "التيار الاسمي أثناء التدفئة."],
+  ["Rated Power Input", "ratedPowerInput", "Rated Power Input", "القدرة الكهربائية الاسمية الداخلة."],
+  ["EER", "eer", "EER", "نسبة كفاءة التبريد."],
+  ["COP", "cop", "COP", "معامل أداء التدفئة."],
+  ["Max. Discharge Pressure", "maxDischargePressure", "Max. Discharge Pressure", "أقصى ضغط للطرد."],
+  ["Max. Suction Pressure", "maxSuctionPressure", "Max. Suction Pressure", "أقصى ضغط للسحب."],
+  ["Design Pressure", "designPressure", "Design Pressure", "ضغط التصميم."],
+  ["Compressor FLA", "compressorFLA", "Compressor FLA", "تيار الحمل الكامل للضاغط."],
+  ["Compressor RLA", "compressorRLA", "Compressor RLA", "تيار الحمل المقنن للضاغط."],
+  ["Compressor LRA", "compressorLRA", "Compressor LRA", "تيار بدء الحركة المقفل للضاغط."],
+  ["MCA", "mca", "MCA", "الحد الأدنى لسعة التيار."],
+  ["MOCP", "mocp", "MOCP", "الحد الأقصى لحماية التيار."],
+  ["Climate Type (T1/T3)", "climateType", "Climate Type (T1/T3)", "تصنيف المناخ مثل T1 أو T3."],
+  ["Max. Operating Temperature", "maxOperatingTemperature", "Max. Operating Temperature", "أقصى درجة حرارة تشغيل."],
+  ["Indoor Air Volume", "indoorAirVolume", "Indoor Air Volume", "حجم تدفق الهواء للوحدة الداخلية."],
+  ["Indoor Unit Weight", "indoorWeight", "Indoor Unit Weight", "وزن الوحدة الداخلية."],
+  ["Outdoor Unit Weight", "outdoorWeight", "Outdoor Unit Weight", "وزن الوحدة الخارجية."],
+  ["Waterproof Class / IP", "ipRating", "Waterproof Class / IP", "فئة الحماية من الماء والأجسام الصلبة."],
+  ["Serial Number", "serial", "Serial Number", "الرقم التسلسلي."],
+  ["Manufacturing Date", "manufactureDate", "Manufacturing Date", "تاريخ التصنيع."],
+  ["Matching Indoor", "matchingIndoor", "Matching Indoor", "موديل الوحدة الداخلية المطابق."],
 ] as const;
 type FieldKey = (typeof FIELDS)[number][1];
 type FieldDefinition = readonly [string, FieldKey, string, string];
@@ -30,100 +54,76 @@ type Form = Record<FieldKey, string>;
 const emptyForm = (): Form => Object.fromEntries(FIELDS.map(([, key]) => [key, ""])) as Form;
 
 const clean = (value: string) => value.replace(/[|¦]/g, " ").replace(/\s+/g, " ").trim();
-const normalizeLabel = (value: string) => clean(value).toLowerCase().replace(/[/:=\-#()[\]]/g, " ").replace(/\s+/g, " ").trim();
-const looksLikeLabelRemainder = (value: string) => {
+const normalizeLabel = (value: string) => clean(value).toLowerCase().replace(/[/:=\-#()[\].]/g, " ").replace(/\s+/g, " ").trim();
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
+const labelWords = new Set(["model", "number", "no", "cooling", "heating", "capacity", "btu", "hr", "refrigerant", "quantity", "charge", "rated", "voltage", "volt", "volts", "phase", "ph", "frequency", "freq", "hz", "current", "amps", "amperage", "power", "input", "eer", "cop", "max", "discharge", "suction", "pressure", "design", "compressor", "fla", "rla", "lra", "mca", "mocp", "climate", "type", "operating", "temperature", "indoor", "air", "volume", "unit", "weight", "waterproof", "class", "ip", "serial", "manufacturing", "date", "matching"]);
+const looksLikeLabel = (value: string) => {
   const normalized = normalizeLabel(value);
-  if (!normalized) return true;
-  if (/^(brand|manufacturer|model|model name|serial|serial no|capacity|btu|cooling|heating|power|input|current|voltage|phase|ph|frequency|freq|refrigerant|charge|quantity|pressure|weight|eer|cop|ip|rating|date|mfg)(\s+(unit|name|number|no|input|capacity|power|amps|amperage|operating|quantity|hr|watts|supply|rating|of|manufacture))*$/i.test(normalized)) return true;
-  const labelWords = new Set(["brand", "manufacturer", "manufactured", "by", "model", "name", "serial", "number", "no", "capacity", "btu", "hr", "cooling", "heating", "power", "input", "current", "amps", "voltage", "volt", "volts", "supply", "phase", "ph", "frequency", "freq", "hz", "refrigerant", "charge", "quantity", "pressure", "max", "operating", "weight", "eer", "cop", "ip", "rating", "date", "mfg", "of", "manufacture"]);
-  if (!/\d/.test(value) && normalized.split(" ").every((word) => labelWords.has(word))) return true;
-  return false;
-};
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const afterLabel = (line: string, labels: string[]) => {
-  for (const label of [...labels].sort((a, b) => b.length - a.length)) {
-    const pattern = new RegExp(`^\\s*${escapeRegExp(label)}(?:\\s*[:=]\\s*|\\s+-\\s*|\\s+)?(.*)$`, "i");
-    const match = line.match(pattern);
-    if (!match) continue;
-    const candidate = clean(match[1].replace(/^[-:=#\/()]+\s*/, ""));
-    if (!candidate || looksLikeLabelRemainder(candidate)) continue;
-    return candidate;
-  }
-  return "";
+  return !normalized || (!/\d/.test(value) && normalized.split(" ").every((word) => labelWords.has(word)));
 };
 
 function parsePlateText(rawText: string): Form {
   const lines = rawText.split(/\r?\n/).map(clean).filter(Boolean);
   const result = emptyForm();
 
-  const nextAfterExactLabel = (labels: string[]) => {
+  const valueFor = (labels: string[]) => {
+    const wanted = labels
+      .map((raw) => ({ raw, normalized: normalizeLabel(raw) }))
+      .sort((a, b) => b.normalized.length - a.normalized.length);
     for (let index = 0; index < lines.length; index += 1) {
-      const current = normalizeLabel(lines[index]);
-      const label = labels.find((item) => current === normalizeLabel(item));
-      if (!label) continue;
-      const next = clean(lines[index + 1] ?? '');
-      if (next && !looksLikeLabelRemainder(next)) return next;
-    }
-    return '';
-  };
-
-  const inline = (patterns: RegExp[]) => {
-    for (const line of lines) {
-      for (const pattern of patterns) {
-        const match = line.match(pattern);
-        const value = clean(match?.[1] ?? '');
-        if (value && !looksLikeLabelRemainder(value)) return value;
+      const normalized = normalizeLabel(lines[index]);
+      const exact = wanted.find((label) => normalized === label.normalized);
+      if (exact) {
+        const next = clean(lines[index + 1] ?? "");
+        if (next && !looksLikeLabel(next)) return next;
+        continue;
+      }
+      const inlineLabel = wanted.find((label) => normalized.startsWith(`${label.normalized} `));
+      if (inlineLabel) {
+        const pattern = new RegExp(`^\\s*${escapeRegExp(inlineLabel.raw).replace(/\\\\ /g, "\\\\s+")}\\s*(?:[:=\\-]\\s*)?(.+)$`, "i");
+        const match = lines[index].match(pattern);
+        const value = clean(match?.[1] ?? "");
+        if (value && !looksLikeLabel(value)) return value;
       }
     }
-    return '';
+    return "";
   };
 
-  result.brand = inline([/^manufactured\s+by\s*[:=-]?\s*(.+)$/i, /^brand\s*(?:\/\s*manufacturer)?\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Manufactured By', 'Brand / Manufacturer']);
-  result.model = inline([/^model(?:\s*(?:no|number|name))?\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Model', 'Model Name', 'Model No', 'Model / Model Name']);
-  result.indoorModel = inline([/^(?:indoor\s+unit\s+model|indoor\s+model)\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Indoor Unit Model', 'Indoor Model']);
-  result.outdoorModel = inline([/^(?:outdoor\s+unit\s+model|outdoor\s+model)\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Outdoor Unit Model', 'Outdoor Model']);
-  result.serial = inline([/^serial(?:\s+number|\s+no)?\s*(?:\/\s*S\/?N)?\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Serial No', 'Serial Number', 'Serial Number / S/N']);
-  result.manufactureDate = inline([/^(?:mfg\s+date|date\s+of\s+manufacture|manufacture\s+date)\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['MFG Date', 'Date of Manufacture']);
-  result.refrigerant = inline([/^refrigerant\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Refrigerant']);
-  result.voltage = inline([/^(?:power\s+supply|rated\s+voltage)\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Power Supply : Volts- Ph-Hz', 'Power Supply', 'Rated Voltage / Power Supply']);
-  result.phase = inline([/^phase\s*(?:\/\s*ph)?\s*[:=-]\s*(.+)$/i]);
-  result.frequency = inline([/^(?:rated\s+)?frequency\s*[:=-]\s*(.+)$/i]);
-  result.eer = inline([/^eer\s*[:=-]\s*(.+)$/i]);
-  result.cop = inline([/^cop\s*[:=-]\s*(.+)$/i]);
-  result.ipRating = inline([/^ip\s+rating\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['IP Rating / Waterproof']);
-  result.maxPressure = inline([/^(?:max\s+operating\s+pressure|max\s+pressure)\s*[:=-]\s*(.+)$/i]);
-  result.charge = inline([/^(?:refrigerant\s+charge|charge|quantity)\s*[:=-]\s*(.+)$/i]);
-  result.indoorWeight = inline([/^indoor\s+unit\s+weight\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Indoor Unit Weight']);
-  result.outdoorWeight = inline([/^outdoor\s+unit\s+weight\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Outdoor Unit Weight']);
+  const read = (key: FieldKey, labels: string[]) => {
+    result[key] = valueFor(labels);
+  };
 
-  const capacityLine = rawText.match(/(?:capacity|cooling\s+capacity)\s*\(?\s*(?:btu\s*\/?\s*hr)?\s*\)?\s*[:=-]?\s*(\d{4,6})\s*(?:btu\s*\/?\s*hr)?/i);
-  const anyCapacity = rawText.match(/\b(\d{4,6})\s*btu\s*\/?\s*hr\b/i);
-  result.btu = capacityLine?.[1] ? `${capacityLine[1]} Btu/hr` : anyCapacity?.[1] ? `${anyCapacity[1]} Btu/hr` : '';
+  read("model", ["Model", "Model No", "Model Number", "Model Name"]);
+  read("coolingCapacity", ["Cooling Capacity", "Cooling Capacity Btu Hr", "Capacity Cooling"]);
+  read("heatingCapacity", ["Heating Capacity", "Heating Capacity Btu Hr", "Capacity Heating"]);
+  read("refrigerant", ["Refrigerant", "Refrigerant Type"]);
+  read("charge", ["Refrigerant Quantity / Charge", "Refrigerant Charge", "Refrigerant Quantity", "Charge"]);
+  read("voltage", ["Rated Voltage", "Voltage", "Power Supply Volts Ph Hz"]);
+  read("phase", ["Phase", "Ph"]);
+  read("frequency", ["Rated Frequency", "Frequency", "Freq"]);
+  read("ratedCoolingCurrent", ["Rated Cooling Current", "Cooling Current", "Cooling Amps", "Rated Cooling Amps"]);
+  read("ratedHeatingCurrent", ["Rated Heating Current", "Heating Current", "Heating Amps", "Rated Heating Amps"]);
+  read("ratedPowerInput", ["Rated Power Input", "Power Input", "Input Power"]);
+  read("eer", ["EER"]);
+  read("cop", ["COP"]);
+  read("maxDischargePressure", ["Max Discharge Pressure", "Maximum Discharge Pressure"]);
+  read("maxSuctionPressure", ["Max Suction Pressure", "Maximum Suction Pressure"]);
+  read("designPressure", ["Design Pressure"]);
+  read("compressorFLA", ["Compressor FLA", "FLA"]);
+  read("compressorRLA", ["Compressor RLA", "RLA"]);
+  read("compressorLRA", ["Compressor LRA", "LRA"]);
+  read("mca", ["MCA", "Minimum Circuit Ampacity"]);
+  read("mocp", ["MOCP", "Maximum Overcurrent Protection"]);
+  read("climateType", ["Climate Type T1 T3", "Climate Type", "T1 T3"]);
+  read("maxOperatingTemperature", ["Max Operating Temperature", "Maximum Operating Temperature"]);
+  read("indoorAirVolume", ["Indoor Air Volume", "Air Volume", "Air Flow"]);
+  read("indoorWeight", ["Indoor Unit Weight"]);
+  read("outdoorWeight", ["Outdoor Unit Weight"]);
+  read("ipRating", ["Waterproof Class IP", "Waterproof Class", "IP Rating", "IP"]);
+  read("serial", ["Serial Number", "Serial No", "S N", "S/N"]);
+  read("manufactureDate", ["Manufacturing Date", "Manufacture Date", "Date Of Manufacture", "MFG Date"]);
+  read("matchingIndoor", ["Matching Indoor", "Matching Indoor Unit", "Matched Indoor Unit"]);
 
-  if (!result.brand) {
-    const knownBrand = rawText.match(/\b(zamil|carrier|daikin|midea|gree|lg|samsung|trane|york|toshiba|panasonic|haier|hisense|aux|mitsubishi|hitachi|general)\b/i);
-    if (knownBrand) result.brand = knownBrand[1];
-  }
-  if (!result.model) {
-    const modelCode = rawText.match(/\bKYA\d{3}[A-Z0-9]{5,}\b/i) || rawText.match(/\b(?=[A-Z0-9-]{7,}\b)(?=[A-Z0-9-]*[A-Z])(?=[A-Z0-9-]*\d)[A-Z0-9-]{7,}\b/i);
-    if (modelCode && !/^R(?:22|32|134A|404A|407C|410A|290|600A|454B|1234YF)$/i.test(modelCode[0])) result.model = modelCode[0];
-  }
-  if (!result.serial) {
-    const serialCode = rawText.match(/\b[A-Z]{2,}\d{2,}[-–][A-Z0-9]{4,}\b/i);
-    if (serialCode) result.serial = serialCode[0];
-  }
-  if (!result.refrigerant) {
-    const match = rawText.match(/\bR[- ]?(?:22|32|134a|404a|407c|410a|290|600a|454b|1234yf)\b/i);
-    if (match) result.refrigerant = match[0].toUpperCase().replace(/\s+/g, '');
-  }
-  if (!result.frequency) {
-    const match = rawText.match(/\b(?:50|60)\s*Hz\b/i) || rawText.match(/\b(?:208|220|230|240|380|400|415)\s*\/?\s*[^\n]{0,8}?\b(?:50|60)\b/i);
-    if (match) result.frequency = `${match[0].match(/(?:50|60)/)?.[0] ?? match[0]} Hz`;
-  }
-  if (!result.voltage) {
-    const match = rawText.match(/\b(?:208|220|230|240|380|400|415)(?:\s*\/\s*(?:208|220|230|240))?\s*(?:V|VAC)?\b/i);
-    if (match) result.voltage = match[0];
-  }
   return result;
 }
 
