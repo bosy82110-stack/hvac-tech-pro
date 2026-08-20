@@ -55,7 +55,7 @@ const emptyForm = (): Form => Object.fromEntries(FIELDS.map(([, key]) => [key, "
 
 const clean = (value: string) => value.replace(/[|¦]/g, " ").replace(/\s+/g, " ").trim();
 const normalizeLabel = (value: string) => clean(value).toLowerCase().replace(/[/:=\-#()[\].]/g, " ").replace(/\s+/g, " ").trim();
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const labelWords = new Set(["model", "number", "no", "cooling", "heating", "capacity", "btu", "hr", "refrigerant", "quantity", "charge", "rated", "voltage", "volt", "volts", "phase", "ph", "frequency", "freq", "hz", "current", "amps", "amperage", "power", "input", "eer", "cop", "max", "discharge", "suction", "pressure", "design", "compressor", "fla", "rla", "lra", "mca", "mocp", "climate", "type", "operating", "temperature", "indoor", "air", "volume", "unit", "weight", "waterproof", "class", "ip", "serial", "manufacturing", "date", "matching"]);
 const looksLikeLabel = (value: string) => {
   const normalized = normalizeLabel(value);
@@ -194,6 +194,22 @@ function parsePlateText(rawText: string): Form {
     setIfEmpty("mca", ampacityValues[1]);
     setIfEmpty("mocp", ampacityValues[2]);
   }
+
+  const nearbyWeight = (label: RegExp) => {
+    for (let index = 0; index < lines.length; index += 1) {
+      if (!label.test(normalizeLabel(lines[index]))) continue;
+      const candidates = [lines[index], lines[index + 1] ?? ""];
+      for (const candidate of candidates) {
+        const withUnit = candidate.match(/\b\d+(?:[.,]\d+)?\s*(?:kg|kgs|g|lb|lbs)\b/i);
+        if (withUnit) return withUnit[0];
+        const numericOnly = candidate.match(/\b\d+(?:[.,]\d+)?\b/);
+        if (numericOnly && /weight/i.test(label.source)) return numericOnly[0];
+      }
+    }
+    return "";
+  };
+  setIfEmpty("indoorWeight", nearbyWeight(/indoor unit weight/));
+  setIfEmpty("outdoorWeight", nearbyWeight(/outdoor unit weight/));
 
   // Design Pressure may contain H.S. and L.S. values instead of explicit max-pressure labels.
   const pressureRow = nextLineAfter(/design pressure/);
