@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAudioPlayer } from "expo-audio";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
@@ -11,28 +12,43 @@ import {
   useWindowDimensions,
 } from "react-native";
 
-const START_SEEN_KEY = "hvac_start_screen_seen_v1";
+// Versioned key ensures users who already opened an older build can see this new screen once.
+const START_SEEN_KEY = "hvac_start_screen_seen_v2";
 
 export default function StartScreen() {
   const { width, height } = useWindowDimensions();
   const [checking, setChecking] = useState(true);
   const [opening, setOpening] = useState(false);
+  const player = useAudioPlayer(
+    require("@/assets/audio/start-screen-hvac-jingle.mp3"),
+  );
 
   useEffect(() => {
     let mounted = true;
+
     AsyncStorage.getItem(START_SEEN_KEY).then((value) => {
       if (!mounted) return;
       setChecking(false);
-      if (value === "1") router.replace("/(tabs)");
+      if (value === "1") {
+        router.replace("/(tabs)");
+        return;
+      }
+
+      // Start the three-second professional HVAC jingle when this screen is visible.
+      player.volume = 0.72;
+      player.play();
     });
+
     return () => {
       mounted = false;
+      player.pause();
     };
-  }, []);
+  }, [player]);
 
   const openApp = async () => {
     if (opening) return;
     setOpening(true);
+    player.pause();
     await AsyncStorage.setItem(START_SEEN_KEY, "1");
     router.replace("/(tabs)");
   };
@@ -51,7 +67,7 @@ export default function StartScreen() {
       <StatusBar hidden />
       <Image
         source={require("@/assets/images/launch-screen.png")}
-        resizeMode="contain"
+        resizeMode="cover"
         style={[styles.image, { width, height }]}
       />
       <Pressable
@@ -65,7 +81,7 @@ export default function StartScreen() {
             left: width * 0.08,
             right: width * 0.08,
             bottom: Math.max(22, height * 0.055),
-            opacity: pressed || opening ? 0.82 : 0.02,
+            opacity: pressed || opening ? 0.02 : 0.01,
           },
         ]}
       />
