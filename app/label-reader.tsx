@@ -93,20 +93,20 @@ function parsePlateText(rawText: string): Form {
     result[key] = valueFor(labels);
   };
 
-  read("model", ["Model", "Model No", "Model Number", "Model Name"]);
+  read("model", ["Model of outdoor unit", "Model Number", "Model No", "Model Name", "Model"]);
   read("coolingCapacity", ["Cooling Capacity", "Cooling Capacity Btu Hr", "Capacity Cooling"]);
   read("heatingCapacity", ["Heating Capacity", "Heating Capacity Btu Hr", "Capacity Heating"]);
   read("refrigerant", ["Refrigerant", "Refrigerant Type"]);
   read("charge", ["Refrigerant Quantity / Charge", "Refrigerant Charge", "Refrigerant Quantity", "Charge"]);
-  read("voltage", ["Rated Voltage", "Voltage", "Power Supply Volts Ph Hz"]);
+  read("voltage", ["Rated Voltage", "Rated volt", "Voltage", "Power Supply Volts Ph Hz"]);
   read("phase", ["Phase", "Ph"]);
-  read("frequency", ["Rated Frequency", "Frequency", "Freq"]);
-  read("ratedCoolingCurrent", ["Rated Cooling Current", "Cooling Current", "Cooling Amps", "Rated Cooling Amps"]);
-  read("ratedHeatingCurrent", ["Rated Heating Current", "Heating Current", "Heating Amps", "Rated Heating Amps"]);
-  read("ratedPowerInput", ["Rated Power Input", "Power Input", "Input Power"]);
-  read("eer", ["EER"]);
+  read("frequency", ["Rated Frequency", "Rated frequency", "Frequency", "Freq"]);
+  read("ratedCoolingCurrent", ["Rated Cooling Current", "Cooling current input", "Cooling Current", "Cooling Amps", "Rated Cooling Amps"]);
+  read("ratedHeatingCurrent", ["Rated Heating Current", "Heating current input", "Heating Current", "Heating Amps", "Rated Heating Amps"]);
+  read("ratedPowerInput", ["Rated Power Input", "Cooling power input", "Heating power input", "Power Input", "Input Power"]);
+  read("eer", ["EER", "E.E.R"]);
   read("cop", ["COP"]);
-  read("maxDischargePressure", ["Max Discharge Pressure", "Maximum Discharge Pressure"]);
+  read("maxDischargePressure", ["Max Discharge Pressure", "Maximum Discharge Pressure", "Outdoor max operating pressure of heat exchanger", "Max operating pressure"]);
   read("maxSuctionPressure", ["Max Suction Pressure", "Maximum Suction Pressure"]);
   read("designPressure", ["Design Pressure"]);
   read("compressorFLA", ["Compressor FLA", "FLA"]);
@@ -114,13 +114,13 @@ function parsePlateText(rawText: string): Form {
   read("compressorLRA", ["Compressor LRA", "LRA"]);
   read("mca", ["MCA", "Minimum Circuit Ampacity"]);
   read("mocp", ["MOCP", "Maximum Overcurrent Protection"]);
-  read("climateType", ["Climate Type T1 T3", "Climate Type", "T1 T3"]);
+  read("climateType", ["Climate Type T1 T3", "Test conditions", "Climate Type", "T1 T3"]);
   read("maxOperatingTemperature", ["Max Operating Temperature", "Maximum Operating Temperature"]);
   read("indoorAirVolume", ["Indoor Air Volume", "Air Volume", "Air Flow"]);
   read("indoorWeight", ["Indoor Unit Weight"]);
-  read("outdoorWeight", ["Outdoor Unit Weight"]);
-  read("ipRating", ["Waterproof Class IP", "Waterproof Class", "IP Rating", "IP"]);
-  read("serial", ["Serial Number", "Serial No", "S N", "S/N"]);
+  read("outdoorWeight", ["Outdoor unit weight", "Outdoor Unit Weight"]);
+  read("ipRating", ["Water of proof", "Waterproof Class IP", "Waterproof Class", "IP Rating", "Waterproof", "IP"]);
+  read("serial", ["Serial Number", "Serial No", "Number of manufacture", "S N", "S/N"]);
   read("manufactureDate", ["Manufacturing Date", "Manufacture Date", "Date Of Manufacture", "MFG Date"]);
   read("matchingIndoor", ["Matching Indoor", "Matching Indoor Unit", "Matched Indoor Unit"]);
 
