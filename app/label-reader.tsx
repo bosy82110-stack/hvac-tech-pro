@@ -124,6 +124,85 @@ function parsePlateText(rawText: string): Form {
   read("manufactureDate", ["Manufacturing Date", "Manufacture Date", "Date Of Manufacture", "MFG Date"]);
   read("matchingIndoor", ["Matching Indoor", "Matching Indoor Unit", "Matched Indoor Unit"]);
 
+  const nextLineAfter = (needle: RegExp) => {
+    const index = lines.findIndex((line) => needle.test(normalizeLabel(line)));
+    return index >= 0 ? clean(lines[index + 1] ?? "") : "";
+  };
+  const setIfEmpty = (key: FieldKey, value: string) => {
+    const cleaned = clean(value);
+    if (!result[key] && cleaned && !looksLikeLabel(cleaned)) result[key] = cleaned;
+  };
+  const pair = (value: string) => value.match(/(\d+(?:[.,]\d+)?)\s*(?:kw|w|a|amps?|psig?)?\s*[\/|]\s*(\d+(?:[.,]\d+)?)/i);
+
+  // Power Supply: Volts - Ph - Hz / 208/230 - 1 - 60 (the three values may be on separate lines).
+  const powerSupply = nextLineAfter(/power supply|volts ph hz/);
+  if (powerSupply) {
+    const powerParts = powerSupply.split(/\s*[\-–—]\s*/).map(clean).filter(Boolean);
+    if (powerParts.length >= 3) {
+      setIfEmpty("voltage", powerParts[0]);
+      setIfEmpty("phase", powerParts[1]);
+      setIfEmpty("frequency", powerParts[2]);
+    }
+  }
+
+  // Carrier/Zamil-style tables: Capacity (Btu/hr) / EER followed by a value row.
+  const coolingRow = nextLineAfter(/capacity btu hr eer/);
+  if (coolingRow) {
+    const capacity = coolingRow.match(/(\d[\d,]*(?:\.\d+)?)\s*(?:btu\s*\/?\s*hr)?/i);
+    if (capacity) setIfEmpty("coolingCapacity", capacity[1]);
+    const efficiency = coolingRow.match(/(?:\/|\|)\s*(\d+(?:\.\d+)?)/);
+    if (efficiency) setIfEmpty("eer", efficiency[1]);
+  }
+  const heatingRow = nextLineAfter(/capacity btu hr cop/);
+  if (heatingRow) {
+    const capacity = heatingRow.match(/(\d[\d,]*(?:\.\d+)?)\s*(?:w|btu\s*\/?\s*hr)?/i);
+    if (capacity) setIfEmpty("heatingCapacity", capacity[1]);
+    const efficiency = heatingRow.match(/(?:\/|\|)\s*(\d+(?:\.\d+)?)/);
+    if (efficiency) setIfEmpty("cop", efficiency[1]);
+  }
+
+  // Input-Power(W)/Current(Amps) rows contain both values in one cell.
+  const inputRow = nextLineAfter(/input power|input power w.*current|power w.*current/);
+  if (inputRow) {
+    const values = pair(inputRow);
+    if (values) {
+      setIfEmpty("ratedPowerInput", values[1]);
+      setIfEmpty("ratedCoolingCurrent", values[2]);
+    }
+  }
+
+  // Refrigerant and charge are often printed in one row: Refrigerant R410a 265/-.
+  const refrigerantLine = lines.find((line) => /refrigerant/i.test(line));
+  if (refrigerantLine) {
+    const refrigerant = refrigerantLine.match(/\b(R(?:22|32|134a|404a|407c|410a|290|600a))\b/i);
+    if (refrigerant) setIfEmpty("refrigerant", refrigerant[1]);
+    const afterType = refrigerantLine.replace(refrigerant?.[0] ?? "", "");
+    const charge = afterType.match(/\b(\d+(?:[.,]\d+)?)\s*(?:kg|g)?\b/i);
+    if (charge) setIfEmpty("charge", charge[1]);
+  }
+
+  // Compressor FLA/LRA and MCA/MOCP are slash-separated pairs.
+  const compressorRow = nextLineAfter(/compressor fla.*lra/);
+  const compressorValues = pair(compressorRow);
+  if (compressorValues) {
+    setIfEmpty("compressorFLA", compressorValues[1]);
+    setIfEmpty("compressorLRA", compressorValues[2]);
+  }
+  const ampacityRow = nextLineAfter(/mca.*mocp/);
+  const ampacityValues = pair(ampacityRow);
+  if (ampacityValues) {
+    setIfEmpty("mca", ampacityValues[1]);
+    setIfEmpty("mocp", ampacityValues[2]);
+  }
+
+  // Design Pressure may contain H.S. and L.S. values instead of explicit max-pressure labels.
+  const pressureRow = nextLineAfter(/design pressure/);
+  const pressures = [...pressureRow.matchAll(/(\d+(?:[.,]\d+)?)\s*psig?\s*(h\.?s\.?|l\.?s\.?)/gi)];
+  for (const match of pressures) {
+    if (/h/i.test(match[2])) setIfEmpty("maxDischargePressure", match[1]);
+    if (/l/i.test(match[2])) setIfEmpty("maxSuctionPressure", match[1]);
+  }
+
   return result;
 }
 
@@ -135,6 +214,7 @@ export default function LabelReaderScreen() {
   const [form, setForm] = useState<Form>(emptyForm);
   const [reading, setReading] = useState(false);
   const [readError, setReadError] = useState("");
+  const [ocrText, setOcrText] = useState("");
   const [saved, setSaved] = useState(false);
   const cameraRef = useRef<CameraView>(null);
 
@@ -144,6 +224,7 @@ export default function LabelReaderScreen() {
     try {
       const result = await TextRecognition.recognize(uri);
       const text = result.text?.trim() ?? "";
+      setOcrText(text);
       if (text) {
         const extracted = parsePlateText(text);
         setForm(extracted);
@@ -151,6 +232,7 @@ export default function LabelReaderScreen() {
           setReadError("تم التقاط الصورة، لكن النص غير واضح بما يكفي لاستخراج الحقول. قرّب اللوحة وأعد التصوير بإضاءة جيدة.");
         }
       } else {
+        setOcrText("");
         setReadError("لم يتم التعرف على نص في الصورة. نظّف اللوحة، قرّب الكاميرا، وثبّت الهاتف ثم أعد التصوير.");
       }
     } catch {
@@ -179,7 +261,7 @@ export default function LabelReaderScreen() {
 
   if (cameraOpen) return <SafeAreaView style={styles.camera}><CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" autofocus="on" /><View style={styles.overlay}><Text style={styles.hint}>ضع لوحة البيانات كاملة داخل الإطار، واجعل الكتابة واضحة ومضاءة</Text><View style={styles.cameraActions}><Pressable style={styles.cameraButton} onPress={() => setCameraOpen(false)}><Text style={styles.whiteText}>رجوع</Text></Pressable><Pressable style={styles.shutter} onPress={takePhoto}><View style={styles.shutterInner} /></Pressable></View></View></SafeAreaView>;
   if (!permission?.granted && !photoUri) return <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}><View style={styles.header}><Pressable onPress={() => router.back()}><Text style={styles.back}>‹</Text></Pressable><Text style={[styles.title, { color: colors.foreground }]}>قارئ لوحة البيانات</Text><View style={{ width: 30 }} /></View><View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}><Text style={styles.permissionIcon}>▣</Text><Text style={[styles.cardTitle, { color: colors.foreground }]}>قراءة بيانات الجهاز</Text><Text style={[styles.body, { color: colors.muted }]}>صوّر لوحة بيانات الجهاز، وسيقرأ التطبيق النص تلقائيًا ثم يملأ الحقول لتراجعها قبل الحفظ.</Text><Pressable style={styles.primary} onPress={requestPermission}><Text style={styles.whiteText}>السماح بالكاميرا</Text></Pressable></View></SafeAreaView>;
-  return <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}><ScrollView contentContainerStyle={styles.content}><View style={styles.header}><Pressable onPress={() => router.back()}><Text style={styles.back}>‹</Text></Pressable><Text style={[styles.title, { color: colors.foreground }]}>قارئ لوحة البيانات</Text><View style={{ width: 30 }} /></View><View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}><Text style={[styles.cardTitle, { color: colors.foreground }]}>راجع البيانات المقروءة</Text><Text style={[styles.body, { color: colors.muted }]}>بعد التصوير يقرأ التطبيق النص تلقائيًا، ثم يمكنك تصحيح أي قيمة يدويًا قبل الحفظ.</Text>{saved && <View style={styles.savedBox}><Text style={styles.savedTitle}>تم حفظ القراءة داخل هذا البوكس</Text><Text style={styles.savedBody}>الصورة والبيانات المقروءة ما زالت ظاهرة هنا ويمكنك تعديلها أو تصوير لوحة جديدة.</Text></View>}</View>{photoUri && <View style={[styles.photoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}><Image source={{ uri: photoUri }} style={styles.photo} resizeMode="contain" /><Text style={[styles.photoStatus, { color: reading ? "#D97706" : "#059669" }]}>{reading ? "جارٍ قراءة لوحة البيانات..." : "تم التقاط الصورة وتحليلها"}</Text>{reading && <ActivityIndicator color="#0891B2" style={{ marginTop: 8 }} />}</View>}{readError ? <View style={styles.errorBox}><Text style={styles.errorText}>{readError}</Text></View> : null}{FIELDS.map(([label, key, _english, meaning]) => <View key={key} style={styles.field}><View style={styles.fieldHeading}><Text style={[styles.label, { color: colors.foreground }]}>{label}</Text></View><Text style={[styles.meaning, { color: colors.muted }]}>{meaning}</Text><TextInput value={form[key]} onChangeText={(value) => setForm((old) => ({ ...old, [key]: value }))} placeholder={`Unread — enter ${label} manually`} placeholderTextColor={colors.muted} style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.surface }]} /></View>)}<Pressable style={styles.primary} onPress={save} disabled={reading}><Text style={styles.whiteText}>حفظ البيانات</Text></Pressable><Pressable style={styles.secondary} onPress={() => { setPhotoUri(null); setForm(emptyForm()); setReadError(""); setSaved(false); setCameraOpen(true); }}><Text style={[styles.secondaryText, { color: colors.primary }]}>تصوير لوحة جديدة</Text></Pressable></ScrollView></SafeAreaView>;
+  return <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}><ScrollView contentContainerStyle={styles.content}><View style={styles.header}><Pressable onPress={() => router.back()}><Text style={styles.back}>‹</Text></Pressable><Text style={[styles.title, { color: colors.foreground }]}>قارئ لوحة البيانات</Text><View style={{ width: 30 }} /></View><View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}><Text style={[styles.cardTitle, { color: colors.foreground }]}>راجع البيانات المقروءة</Text><Text style={[styles.body, { color: colors.muted }]}>بعد التصوير يقرأ التطبيق النص تلقائيًا، ثم يمكنك تصحيح أي قيمة يدويًا قبل الحفظ.</Text>{saved && <View style={styles.savedBox}><Text style={styles.savedTitle}>تم حفظ القراءة داخل هذا البوكس</Text><Text style={styles.savedBody}>الصورة والبيانات المقروءة ما زالت ظاهرة هنا ويمكنك تعديلها أو تصوير لوحة جديدة.</Text></View>}</View>{photoUri && <View style={[styles.photoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}><Image source={{ uri: photoUri }} style={styles.photo} resizeMode="contain" /><Text style={[styles.photoStatus, { color: reading ? "#D97706" : "#059669" }]}>{reading ? "جارٍ قراءة لوحة البيانات..." : "تم التقاط الصورة وتحليلها"}</Text>{reading && <ActivityIndicator color="#0891B2" style={{ marginTop: 8 }} />}</View>}{ocrText ? <View style={[styles.ocrBox, { backgroundColor: colors.surface, borderColor: colors.border }]}><Text style={[styles.ocrTitle, { color: colors.foreground }]}>النص الذي قرأته الكاميرا</Text><Text selectable style={[styles.ocrText, { color: colors.foreground }]}>{ocrText}</Text></View> : null}{readError ? <View style={styles.errorBox}><Text style={styles.errorText}>{readError}</Text></View> : null}{FIELDS.map(([label, key, _english, meaning]) => <View key={key} style={styles.field}><View style={styles.fieldHeading}><Text style={[styles.label, { color: colors.foreground }]}>{label}</Text></View><Text style={[styles.meaning, { color: colors.muted }]}>{meaning}</Text><TextInput value={form[key]} onChangeText={(value) => setForm((old) => ({ ...old, [key]: value }))} placeholder={`Unread — enter ${label} manually`} placeholderTextColor={colors.muted} style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.surface }]} /></View>)}<Pressable style={styles.primary} onPress={save} disabled={reading}><Text style={styles.whiteText}>حفظ البيانات</Text></Pressable><Pressable style={styles.secondary} onPress={() => { setPhotoUri(null); setForm(emptyForm()); setReadError(""); setOcrText(""); setSaved(false); setCameraOpen(true); }}><Text style={[styles.secondaryText, { color: colors.primary }]}>تصوير لوحة جديدة</Text></Pressable></ScrollView></SafeAreaView>;
 }
 
 const styles = StyleSheet.create({ container: { flex: 1 }, content: { padding: 16, gap: 12, paddingBottom: 40 }, header: { minHeight: 58, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }, title: { fontSize: 23, fontWeight: "900" }, back: { fontSize: 42, lineHeight: 42, color: "#0891B2" }, card: { borderWidth: 1, borderRadius: 20, padding: 18, alignItems: "flex-end" }, cardTitle: { fontSize: 19, fontWeight: "900", textAlign: "right", width: "100%" }, body: { fontSize: 15, lineHeight: 24, textAlign: "right", width: "100%", marginTop: 8 }, permissionIcon: { fontSize: 48, color: "#0891B2" }, primary: { backgroundColor: "#0891B2", borderRadius: 15, padding: 16, alignItems: "center", marginTop: 8 }, whiteText: { color: "#FFF", fontSize: 16, fontWeight: "800" }, secondary: { borderWidth: 1, borderColor: "#0891B2", borderRadius: 15, padding: 15, alignItems: "center" }, secondaryText: { fontSize: 16, fontWeight: "800" }, field: { gap: 6 }, fieldHeading: { gap: 3, alignItems: "flex-end" }, label: { fontSize: 15, fontWeight: "800", textAlign: "right" }, englishLabel: { fontSize: 12, fontWeight: "800", textAlign: "right" }, meaning: { fontSize: 12, lineHeight: 18, textAlign: "right" }, input: { borderWidth: 1, borderRadius: 12, padding: 13, fontSize: 16, textAlign: "right" }, photoCard: { borderWidth: 1, borderRadius: 16, padding: 10, alignItems: "center" }, photo: { width: "100%", height: 190, borderRadius: 10 }, photoStatus: { fontSize: 14, fontWeight: "800", marginTop: 8 }, ocrBox: { borderWidth: 1, borderRadius: 14, padding: 12 }, ocrTitle: { fontSize: 14, fontWeight: "900", textAlign: "right" }, ocrText: { fontSize: 13, lineHeight: 21, textAlign: "right", marginTop: 6 }, errorBox: { backgroundColor: "#FEF2F2", borderColor: "#FCA5A5", borderWidth: 1, borderRadius: 14, padding: 12 }, errorText: { color: "#B91C1C", fontSize: 13, lineHeight: 21, textAlign: "right", fontWeight: "700" }, savedBox: { width: "100%", marginTop: 12, padding: 12, borderRadius: 12, backgroundColor: "#ECFDF5", borderWidth: 1, borderColor: "#6EE7B7" }, savedTitle: { color: "#047857", fontSize: 15, fontWeight: "900", textAlign: "right" }, savedBody: { color: "#065F46", fontSize: 13, lineHeight: 20, textAlign: "right", marginTop: 4 }, camera: { flex: 1, backgroundColor: "#000" }, overlay: { flex: 1, justifyContent: "space-between", padding: 24, paddingTop: 80 }, hint: { color: "#FFF", textAlign: "center", fontSize: 17, fontWeight: "700", backgroundColor: "#0009", padding: 12, borderRadius: 12 }, cameraActions: { alignItems: "center", gap: 20 }, cameraButton: { backgroundColor: "#0009", paddingHorizontal: 25, paddingVertical: 12, borderRadius: 12 }, shutter: { width: 76, height: 76, borderRadius: 38, backgroundColor: "#FFF", alignItems: "center", justifyContent: "center" }, shutterInner: { width: 62, height: 62, borderRadius: 31, borderWidth: 4, borderColor: "#0891B2" } });
