@@ -35,19 +35,19 @@ const looksLikeLabelRemainder = (value: string) => {
   const normalized = normalizeLabel(value);
   if (!normalized) return true;
   if (/^(brand|manufacturer|model|model name|serial|serial no|capacity|btu|cooling|heating|power|input|current|voltage|phase|ph|frequency|freq|refrigerant|charge|quantity|pressure|weight|eer|cop|ip|rating|date|mfg)(\s+(unit|name|number|no|input|capacity|power|amps|amperage|operating|quantity|hr|watts|supply|rating|of|manufacture))*$/i.test(normalized)) return true;
-  const labelWords = new Set(["brand", "manufacturer", "model", "name", "serial", "number", "no", "capacity", "btu", "hr", "cooling", "heating", "power", "input", "current", "amps", "voltage", "volt", "phase", "ph", "frequency", "freq", "refrigerant", "charge", "quantity", "pressure", "max", "operating", "weight", "eer", "cop", "ip", "rating", "date", "mfg", "of", "manufacture"]);
+  const labelWords = new Set(["brand", "manufacturer", "manufactured", "by", "model", "name", "serial", "number", "no", "capacity", "btu", "hr", "cooling", "heating", "power", "input", "current", "amps", "voltage", "volt", "volts", "supply", "phase", "ph", "frequency", "freq", "hz", "refrigerant", "charge", "quantity", "pressure", "max", "operating", "weight", "eer", "cop", "ip", "rating", "date", "mfg", "of", "manufacture"]);
   if (!/\d/.test(value) && normalized.split(" ").every((word) => labelWords.has(word))) return true;
   return false;
 };
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const afterLabel = (line: string, labels: string[]) => {
-  const lower = line.toLowerCase();
   for (const label of [...labels].sort((a, b) => b.length - a.length)) {
-    const index = lower.indexOf(label.toLowerCase());
-    if (index >= 0) {
-      const candidate = clean(line.slice(index + label.length).replace(/^\s*[:=\-#/()]+\s*/, ""));
-      if (!candidate || looksLikeLabelRemainder(candidate)) continue;
-      return candidate;
-    }
+    const pattern = new RegExp(`^\\s*${escapeRegExp(label)}(?:\\s*[:=]\\s*|\\s+-\\s*|\\s+)?(.*)$`, "i");
+    const match = line.match(pattern);
+    if (!match) continue;
+    const candidate = clean(match[1].replace(/^[-:=#\/()]+\s*/, ""));
+    if (!candidate || looksLikeLabelRemainder(candidate)) continue;
+    return candidate;
   }
   return "";
 };
@@ -77,8 +77,9 @@ function parsePlateText(rawText: string): Form {
       const labelOnly = labels.some((label) => normalizedLine === normalizeLabel(label)) || looksLikeLabelRemainder(line);
       const candidateNextLine = clean(lines[index + 1] ?? "");
       const nextLineValue = labelOnly && !looksLikeLabelRemainder(candidateNextLine) ? candidateNextLine : "";
-      const value = inlineValue || nextLineValue;
-      if (value && value.length > 0 && value.length < 80 && value.toLowerCase() !== line.toLowerCase() && !looksLikeLabelRemainder(value)) {
+      const value = clean(inlineValue || nextLineValue);
+      const alreadyUsed = value && Object.values(result).some((existing) => existing.toLowerCase() === value.toLowerCase());
+      if (value && value.length > 0 && value.length < 80 && value.toLowerCase() !== line.toLowerCase() && !looksLikeLabelRemainder(value) && !alreadyUsed) {
         result[key] = value;
         break;
       }
@@ -87,6 +88,14 @@ function parsePlateText(rawText: string): Form {
   if (!result.brand) {
     const knownBrand = lines.find((line) => /\b(zamil|carrier|daikin|midea|gree|lg|samsung|trane|york|toshiba|panasonic|haier|hisense|aux|mitsubishi|hitachi|general)\b/i.test(line));
     if (knownBrand) result.brand = knownBrand;
+  }
+  if (!result.model) {
+    const modelCode = rawText.match(/\b(?=[A-Z0-9-]{7,}\b)(?=[A-Z0-9-]*[A-Z])(?=[A-Z0-9-]*\d)[A-Z0-9-]{7,}\b/i);
+    if (modelCode && !/^R(?:22|32|134A|404A|407C|410A|290|600A|454B|1234YF)$/i.test(modelCode[0])) result.model = modelCode[0];
+  }
+  if (!result.btu) {
+    const capacityMatch = rawText.match(/\b(\d{4,6})\s*Btu\s*\/?\s*Hr\b/i);
+    if (capacityMatch) result.btu = `${capacityMatch[1]} Btu/hr`;
   }
   if (!result.refrigerant) {
     const match = rawText.match(/R[- ]?(?:22|32|134a|404a|407c|410a|290|600a|454b|1234yf)/i);
