@@ -1453,6 +1453,15 @@ export default function SectionScreen() {
             </View>
             <Text style={[styles.detailsTitle, { color: colors.foreground }]}>دوائر التكييف</Text>
             <Text style={[styles.detailsBody, { color: colors.muted }]}>مرجع عملي لدوائر التبريد والميكانيكا والباور والكنترول، مع أسماء المكونات ووظيفة كل جزء ومسار الدائرة.</Text>
+            <Text style={[styles.circuitImageTitle, { color: "#6D28D9" }]}>مرجع دورة التبريد والميكانيكا</Text>
+            <View style={[styles.imageViewer, { backgroundColor: "#F8FAFC", borderColor: colors.border }]}>
+              <ScrollView horizontal nestedScrollEnabled directionalLockEnabled={false} showsHorizontalScrollIndicator contentContainerStyle={styles.imageScroller}>
+                <ScrollView nestedScrollEnabled directionalLockEnabled={false} showsVerticalScrollIndicator contentContainerStyle={styles.imageVerticalScroller} style={{ width: Math.max(520, 520 * circuitZoom), height: 340 }}>
+                  <Image source={require("@/assets/images/refrigeration-cycle.png")} resizeMode="contain" style={{ width: 520 * circuitZoom, height: Math.round((520 / 1.5) * circuitZoom) }} />
+                </ScrollView>
+              </ScrollView>
+            </View>
+            <Text style={[styles.circuitImageTitle, { color: "#0E7490" }]}>دائرة كنترول بسيطة للتكييف المركزي</Text>
             <View style={[styles.imageViewer, { backgroundColor: "#F8FAFC", borderColor: colors.border }]}>
               <ScrollView horizontal nestedScrollEnabled directionalLockEnabled={false} showsHorizontalScrollIndicator contentContainerStyle={styles.imageScroller}>
                 <ScrollView nestedScrollEnabled directionalLockEnabled={false} showsVerticalScrollIndicator contentContainerStyle={styles.imageVerticalScroller} style={{ width: Math.max(520, 520 * circuitZoom), height: 340 }}>
@@ -4537,6 +4546,7 @@ const styles = StyleSheet.create({
   circuitColorBadgeText: { color: "#FFFFFF", fontSize: 13, fontWeight: "900" },
   circuitTitleWrap: { flex: 1, alignItems: "flex-end" },
   circuitTitle: { fontSize: 17, fontWeight: "900", textAlign: "right" },
+  circuitImageTitle: { fontSize: 14, fontWeight: "900", textAlign: "right", marginTop: 12, marginBottom: 6 },
   circuitEnglish: { fontSize: 11, fontWeight: "700", marginTop: 2, textAlign: "right" },
   circuitDescription: { fontSize: 13, lineHeight: 21, fontWeight: "600", textAlign: "right", marginTop: 10 },
   circuitPathBox: { borderWidth: 1, borderRadius: 12, padding: 9, marginTop: 10 },
