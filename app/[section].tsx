@@ -51,6 +51,100 @@ const pressureAmpFaultTable = {
   ],
 } as const;
 
+type CircuitComponent = {
+  ar: string;
+  en: string;
+  short: string;
+  function: string;
+};
+
+type CircuitSection = {
+  id: string;
+  title: string;
+  english: string;
+  description: string;
+  color: string;
+  path?: string;
+  components: CircuitComponent[];
+};
+
+const hvacCircuitSections: CircuitSection[] = [
+  {
+    id: "refrigeration",
+    title: "دائرة التبريد والميكانيكا",
+    english: "Refrigeration Circuit",
+    description: "مسار الفريون من الكباس حتى المبخر وعودته إلى الكباس.",
+    color: "#0E7490",
+    path: "Compressor → Discharge Line → Condenser → Liquid Line → Filter Drier → Expansion Device → Evaporator → Suction Line → Compressor",
+    components: [
+      { ar: "الكباس / الضاغط", en: "Compressor", short: "COMP", function: "يسحب بخار الفريون منخفض الضغط ويضغطه إلى ضغط وحرارة مرتفعين." },
+      { ar: "خط الطرد", en: "Discharge Line", short: "DL", function: "ينقل الفريون الساخن عالي الضغط من الكباس إلى المكثف." },
+      { ar: "المكثف", en: "Condenser", short: "COND", function: "يطرد الحرارة من الفريون ويحوّله من غاز إلى سائل." },
+      { ar: "خزان السائل", en: "Liquid Receiver", short: "LR", function: "يخزن الفريون السائل ويضمن توفر كمية مناسبة قبل صمام التمدد." },
+      { ar: "فلتر دراير", en: "Filter Drier", short: "FD", function: "يزيل الرطوبة والشوائب والأحماض من دائرة الفريون." },
+      { ar: "زجاجة البيان", en: "Sight Glass", short: "SG", function: "تساعد في مراقبة سريان الفريون ووجود الفقاعات أو الرطوبة." },
+      { ar: "صمام سولينويد", en: "Solenoid Valve", short: "SV", function: "يفتح ويغلق مسار الفريون كهربائيًا." },
+      { ar: "خط السائل", en: "Liquid Line", short: "LL", function: "ينقل الفريون السائل عالي الضغط إلى عنصر التمدد." },
+      { ar: "صمام التمدد", en: "Expansion Valve", short: "TXV/EXV", function: "يخفض ضغط الفريون وينظم كمية الفريون الداخلة للمبخر." },
+      { ar: "الأنبوبة الشعرية", en: "Capillary Tube", short: "CAP", function: "تخفض ضغط الفريون وتنظم تدفقه في الأنظمة الصغيرة." },
+      { ar: "المبخر", en: "Evaporator", short: "EVAP", function: "يمتص الحرارة من الهواء ويحوّل الفريون من سائل إلى بخار." },
+      { ar: "مجمع السحب", en: "Suction Accumulator", short: "SA", function: "يمنع وصول الفريون السائل إلى الكباس." },
+      { ar: "خط السحب", en: "Suction Line", short: "SL", function: "يعيد بخار الفريون منخفض الضغط من المبخر إلى الكباس." },
+    ],
+  },
+  {
+    id: "power",
+    title: "دائرة الباور",
+    english: "Power Circuit",
+    description: "دائرة تغذية الأحمال الرئيسية مثل الكباس وموتورات المراوح.",
+    color: "#2563EB",
+    path: "Power Supply → Main Breaker → Disconnect → Contactor → Overload → Motor / Compressor",
+    components: [
+      { ar: "مصدر الكهرباء", en: "Power Supply", short: "L/N أو L1/L2/L3", function: "يغذي الجهاز بالكهرباء." },
+      { ar: "القاطع الرئيسي", en: "Main Circuit Breaker", short: "MCB/MCCB", function: "يحمي ويفصل التغذية الرئيسية." },
+      { ar: "الفيوز", en: "Fuse", short: "F", function: "يحمي الدائرة من زيادة التيار وقصر الدائرة." },
+      { ar: "مفتاح فصل", en: "Disconnect Switch", short: "DS", function: "يفصل الكهرباء عن الجهاز أثناء الصيانة." },
+      { ar: "كونتاكتور الكباس", en: "Compressor Contactor", short: "KM/MC", function: "يشغل ويفصل الكباس." },
+      { ar: "أوفرلود الكباس", en: "Compressor Overload", short: "OL", function: "يحمي الكباس من زيادة التيار والحمل الزائد." },
+      { ar: "الكباس", en: "Compressor", short: "COMP", function: "المحرك الرئيسي لدائرة التبريد." },
+      { ar: "كونتاكتور المروحة", en: "Fan Contactor", short: "FC/KM", function: "يشغل ويفصل موتور المروحة." },
+      { ar: "أوفرلود المروحة", en: "Fan Overload", short: "OL", function: "يحمي موتور المروحة من زيادة التيار." },
+      { ar: "موتور مروحة المكثف", en: "Condenser Fan Motor", short: "CFM", function: "يبرد المكثف ويطرد الحرارة." },
+      { ar: "موتور مروحة المبخر", en: "Evaporator Fan Motor", short: "IFM/EFM", function: "يحرك الهواء على المبخر." },
+      { ar: "مكثف تشغيل", en: "Run Capacitor", short: "CAP", function: "يوفر فرق الطور وعزم التشغيل للموتور." },
+      { ar: "مكثف بدء", en: "Start Capacitor", short: "SC", function: "يوفر عزم بدء إضافيًا عند بدء تشغيل الموتور." },
+    ],
+  },
+  {
+    id: "control",
+    title: "دائرة الكنترول",
+    english: "Control Circuit",
+    description: "دائرة التحكم والحماية التي تقرر متى يعمل الكباس ومتى يفصل.",
+    color: "#7C3AED",
+    path: "Control Transformer → Control Fuse → ON/OFF Switch → Phase Sequence → High Pressure → Low Pressure → Overload NC 95-96 → Thermostat → Contactor Coil A1/A2",
+    components: [
+      { ar: "محول الكنترول", en: "Control Transformer", short: "TR", function: "يحول الجهد مثل 220V إلى 24V للكنترول." },
+      { ar: "فيوز الكنترول", en: "Control Fuse", short: "CF/F", function: "يحمي دائرة الكنترول." },
+      { ar: "مفتاح التشغيل", en: "ON/OFF Switch", short: "SW", function: "يعطي أو يمنع أمر التشغيل." },
+      { ar: "الثرموستات", en: "Thermostat", short: "TSTAT", function: "يعطي أمر التشغيل أو الفصل حسب درجة الحرارة." },
+      { ar: "حساس درجة الحرارة", en: "Temperature Sensor", short: "TS", function: "يقيس درجة الحرارة ويرسلها إلى الكنترول." },
+      { ar: "فاز سيكونس", en: "Phase Sequence Relay", short: "PSR", function: "يراقب ترتيب الفازات وفقدانها." },
+      { ar: "هاي برشر", en: "High Pressure Switch", short: "HP", function: "يفصل الكباس عند ارتفاع ضغط الطرد." },
+      { ar: "لو برشر", en: "Low Pressure Switch", short: "LP", function: "يفصل الكباس عند انخفاض ضغط السحب." },
+      { ar: "أوفرلود", en: "Overload Relay", short: "OL", function: "يحمي موتور الكباس من زيادة التيار." },
+      { ar: "حماية الفولت", en: "Voltage Protection Relay", short: "VPR", function: "تحمي الجهاز من انخفاض أو ارتفاع الفولت." },
+      { ar: "ريلاي", en: "Relay", short: "R", function: "يتحكم في دائرة أخرى باستخدام إشارة كهربائية." },
+      { ar: "كونتاكتور", en: "Contactor", short: "KM/MC", function: "يوصل ويفصل القدرة عن الحمل." },
+      { ar: "ملف الكونتاكتور", en: "Contactor Coil", short: "A1/A2", function: "عند تغذيته يغير حالة نقاط الكونتاكتور." },
+      { ar: "نقطة مساعدة NO", en: "Normally Open Contact", short: "NO / 13-14", function: "تغلق عند تشغيل الكونتاكتور." },
+      { ar: "نقطة مساعدة NC", en: "Normally Closed Contact", short: "NC / 21-22", function: "تفتح عند تشغيل الكونتاكتور." },
+      { ar: "لمبة بيان", en: "Pilot Lamp", short: "PL", function: "تبين حالة التشغيل أو العطل." },
+      { ar: "مؤقت", en: "Timer Relay", short: "TR", function: "يؤخر التشغيل أو الفصل." },
+      { ar: "ريلاي حماية", en: "Protection Relay", short: "PR", function: "ينفذ الحماية ويرسل أمر الفصل." },
+    ],
+  },
+];
+
 const compressorWorkbookGuidance = [
   "راجع القدرة المطلوبة أكثر من مرة قبل اعتمادها في العمل.",
   "البيانات مستخرجة في الغالب من كتالوجات الشركات، وبعضها جُمِع من مصادر فنية عند صعوبة الوصول إلى الكتالوج.",
@@ -316,8 +410,8 @@ const info: Record<string, { title: string; subtitle: string; icon: any }> = {
     icon: "calculator",
   },
   "circuit-reference": {
-    title: "مرجع الدوائر",
-    subtitle: "رسومات وشرح دوائر التبريد والميكانيكا والكهرباء",
+    title: "دوائر التكييف",
+    subtitle: "التبريد والباور والكنترول ووظيفة كل مكوّن",
     icon: "book.fill",
   },
   "circuit-simulator": {
@@ -1353,125 +1447,56 @@ export default function SectionScreen() {
     if (key === "circuit-reference") {
       return (
         <View>
-          <View
-            style={[
-              styles.detailCard,
-              { backgroundColor: colors.surface, borderColor: "#7C3AED" },
-            ]}
-          >
+          <View style={[styles.detailCard, { backgroundColor: colors.surface, borderColor: "#7C3AED" }]}>
             <View style={[styles.circleIcon, { backgroundColor: "#EDE9FE" }]}>
               <IconSymbol name="book.fill" size={24} color="#7C3AED" />
             </View>
-            <Text style={[styles.detailsTitle, { color: colors.foreground }]}>
-              دوائر التبريد
-            </Text>
-            <Text style={[styles.detailsBody, { color: colors.muted }]}>
-              دورة التبريد الأساسية ومسار الفريون بين الضاغط والمكثف والمجفف
-              وصمام التمدد والمبخر.
-            </Text>
-            <View
-              style={[
-                styles.imageViewer,
-                { backgroundColor: "#F8FAFC", borderColor: colors.border },
-              ]}
-            >
-                  <ScrollView
-                    horizontal
-                    nestedScrollEnabled
-                    directionalLockEnabled={false}
-                    showsHorizontalScrollIndicator
-                    contentContainerStyle={styles.imageScroller}
-                  >
-                    <ScrollView
-                      nestedScrollEnabled
-                      directionalLockEnabled={false}
-                      showsVerticalScrollIndicator
-                      contentContainerStyle={styles.imageVerticalScroller}
-                      style={{
-                        width: Math.max(520, 520 * circuitZoom),
-                        height: 300,
-                      }}
-                    >
-                      <Image
-                        source={require("@/assets/images/refrigeration-cycle.png")}
-                        resizeMode="contain"
-                        style={{
-                          width: 520 * circuitZoom,
-                          height: Math.round((520 / 1.5) * circuitZoom),
-                        }}
-                      />
-                    </ScrollView>
-                  </ScrollView>
+            <Text style={[styles.detailsTitle, { color: colors.foreground }]}>دوائر التكييف</Text>
+            <Text style={[styles.detailsBody, { color: colors.muted }]}>مرجع عملي لدوائر التبريد والميكانيكا والباور والكنترول، مع أسماء المكونات ووظيفة كل جزء ومسار الدائرة.</Text>
+            <View style={[styles.imageViewer, { backgroundColor: "#F8FAFC", borderColor: colors.border }]}>
+              <ScrollView horizontal nestedScrollEnabled directionalLockEnabled={false} showsHorizontalScrollIndicator contentContainerStyle={styles.imageScroller}>
+                <ScrollView nestedScrollEnabled directionalLockEnabled={false} showsVerticalScrollIndicator contentContainerStyle={styles.imageVerticalScroller} style={{ width: Math.max(520, 520 * circuitZoom), height: 340 }}>
+                  <Image source={require("@/assets/images/hvac-control-circuits.png")} resizeMode="contain" style={{ width: 520 * circuitZoom, height: Math.round((520 / 1.5) * circuitZoom) }} />
+                </ScrollView>
+              </ScrollView>
             </View>
             <View style={styles.zoomRow}>
-              <Pressable
-                onPress={() =>
-                  setCircuitZoom((value) =>
-                    Math.min(2.5, Number((value + 0.25).toFixed(2))),
-                  )
-                }
-                style={[styles.zoomButton, { backgroundColor: "#7C3AED" }]}
-              >
-                <Text style={styles.zoomButtonText}>+</Text>
-              </Pressable>
-              <Text style={[styles.zoomLabel, { color: colors.muted }]}>
-                اسحب الصورة لرؤية الحواف • التكبير: {Math.round(circuitZoom * 100)}%
-              </Text>
-              <Pressable
-                onPress={() =>
-                  setCircuitZoom((value) =>
-                    Math.max(1, Number((value - 0.25).toFixed(2))),
-                  )
-                }
-                style={[
-                  styles.zoomButton,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: "#7C3AED",
-                    borderWidth: 1,
-                  },
-                ]}
-              >
-                <Text style={[styles.zoomButtonText, { color: "#7C3AED" }]}>
-                  −
-                </Text>
-              </Pressable>
-            </View>
-            <View style={[styles.pipeNote, { backgroundColor: "#F5F3FF" }]}>
-              <Text style={[styles.pipeNoteTitle, { color: "#6D28D9" }]}>
-                مكونات الدورة
-              </Text>
-              <Text style={[styles.pipeNoteText, { color: "#4C1D95" }]}>
-                • الضاغط Compressor: يرفع ضغط وحرارة غاز الفريون.
-              </Text>
-              <Text style={[styles.pipeNoteText, { color: "#4C1D95" }]}>
-                • المكثف Condenser: يطرد الحرارة ويحوّل الفريون إلى سائل.
-              </Text>
-              <Text style={[styles.pipeNoteText, { color: "#4C1D95" }]}>
-                • مجفف/خزان الفريون Receiver / Drier: تنقية وتجميع وسيط التبريد.
-              </Text>
-              <Text style={[styles.pipeNoteText, { color: "#4C1D95" }]}>
-                • صمام التمدد Expansion Valve: يخفض الضغط وينظم التدفق.
-              </Text>
-              <Text style={[styles.pipeNoteText, { color: "#4C1D95" }]}>
-                • المبخر Evaporator: يمتص الحرارة ويعيد الفريون إلى خط السحب.
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.pipeNote,
-                { backgroundColor: "#EFF6FF", marginTop: 8 },
-              ]}
-            >
-              <Text style={[styles.pipeNoteTitle, { color: "#1D4ED8" }]}>
-                مسارات الفريون
-              </Text>
-              <Text style={[styles.pipeNoteText, { color: "#1E3A8A" }]}>
-                الأحمر: خط الطرد/الغاز الساخن عالي الضغط، الأصفر: خط السائل عالي
-                الضغط، الأزرق: خط السحب/البخار منخفض الضغط.
-              </Text>
+              <Pressable onPress={() => setCircuitZoom((value) => Math.min(3, Number((value + 0.25).toFixed(2))))} style={[styles.zoomButton, { backgroundColor: "#7C3AED" }]}><Text style={styles.zoomButtonText}>+</Text></Pressable>
+              <Text style={[styles.zoomLabel, { color: colors.muted }]}>اسحب الصورة لرؤية الأطراف • التكبير: {Math.round(circuitZoom * 100)}%</Text>
+              <Pressable onPress={() => setCircuitZoom((value) => Math.max(1, Number((value - 0.25).toFixed(2))))} style={[styles.zoomButton, { backgroundColor: colors.surface, borderColor: "#7C3AED", borderWidth: 1 }]}><Text style={[styles.zoomButtonText, { color: "#7C3AED" }]}>−</Text></Pressable>
             </View>
           </View>
+          {hvacCircuitSections.map((circuit) => (
+            <View key={circuit.id} style={[styles.circuitSectionCard, { backgroundColor: colors.surface, borderColor: circuit.color }]}>
+              <View style={[styles.circuitSectionHeader, { backgroundColor: `${circuit.color}16` }]}>
+                <View style={[styles.circuitColorBadge, { backgroundColor: circuit.color }]}><Text style={styles.circuitColorBadgeText}>{circuit.components.length}</Text></View>
+                <View style={styles.circuitTitleWrap}>
+                  <Text style={[styles.circuitTitle, { color: circuit.color }]}>{circuit.title}</Text>
+                  <Text style={[styles.circuitEnglish, { color: colors.muted }]}>{circuit.english}</Text>
+                </View>
+              </View>
+              <Text style={[styles.circuitDescription, { color: colors.foreground }]}>{circuit.description}</Text>
+              {circuit.path && <View style={[styles.circuitPathBox, { backgroundColor: `${circuit.color}10`, borderColor: `${circuit.color}55` }]}><Text style={[styles.circuitPathLabel, { color: circuit.color }]}>مسار الدائرة</Text><Text style={[styles.circuitPath, { color: colors.foreground }]}>{circuit.path}</Text></View>}
+              <ScrollView horizontal showsHorizontalScrollIndicator nestedScrollEnabled contentContainerStyle={styles.circuitTableScroll}>
+                <View style={[styles.circuitTable, { borderColor: colors.border }]}>
+                  <View style={[styles.circuitTableRow, { backgroundColor: circuit.color }]}>
+                    <Text style={[styles.circuitCell, styles.circuitIndexCell, styles.circuitHeaderCell]}>#</Text>
+                    <Text style={[styles.circuitCell, styles.circuitNameCell, styles.circuitHeaderCell]}>المكوّن / Component</Text>
+                    <Text style={[styles.circuitCell, styles.circuitShortCell, styles.circuitHeaderCell]}>الاختصار</Text>
+                    <Text style={[styles.circuitCell, styles.circuitFunctionCell, styles.circuitHeaderCell]}>الوظيفة</Text>
+                  </View>
+                  {circuit.components.map((component, index) => (
+                    <View key={`${circuit.id}-${component.short}-${index}`} style={[styles.circuitTableRow, { backgroundColor: index % 2 === 0 ? colors.surface : `${circuit.color}0A`, borderTopColor: colors.border }]}>
+                      <Text style={[styles.circuitCell, styles.circuitIndexCell, { color: circuit.color }]}>{index + 1}</Text>
+                      <View style={[styles.circuitCell, styles.circuitNameCell]}><Text style={[styles.circuitArabicName, { color: colors.foreground }]}>{component.ar}</Text><Text style={[styles.circuitEnglishName, { color: colors.muted }]}>{component.en}</Text></View>
+                      <Text style={[styles.circuitCell, styles.circuitShortCell, { color: circuit.color, fontWeight: "900" }]}>{component.short}</Text>
+                      <Text style={[styles.circuitCell, styles.circuitFunctionCell, { color: colors.foreground }]}>{component.function}</Text>
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+          ))}
         </View>
       );
     }
@@ -4488,6 +4513,46 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "right",
   },
+  circuitSectionCard: {
+    borderWidth: 1.5,
+    borderRadius: 18,
+    padding: 12,
+    marginTop: 12,
+    overflow: "hidden",
+  },
+  circuitSectionHeader: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    borderRadius: 14,
+    padding: 10,
+    gap: 10,
+  },
+  circuitColorBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  circuitColorBadgeText: { color: "#FFFFFF", fontSize: 13, fontWeight: "900" },
+  circuitTitleWrap: { flex: 1, alignItems: "flex-end" },
+  circuitTitle: { fontSize: 17, fontWeight: "900", textAlign: "right" },
+  circuitEnglish: { fontSize: 11, fontWeight: "700", marginTop: 2, textAlign: "right" },
+  circuitDescription: { fontSize: 13, lineHeight: 21, fontWeight: "600", textAlign: "right", marginTop: 10 },
+  circuitPathBox: { borderWidth: 1, borderRadius: 12, padding: 9, marginTop: 10 },
+  circuitPathLabel: { fontSize: 12, fontWeight: "900", textAlign: "right", marginBottom: 4 },
+  circuitPath: { fontSize: 11, lineHeight: 19, fontWeight: "700", textAlign: "left" },
+  circuitTableScroll: { paddingTop: 10, paddingBottom: 2 },
+  circuitTable: { minWidth: 690, borderWidth: 1, borderRadius: 12, overflow: "hidden" },
+  circuitTableRow: { flexDirection: "row-reverse", minHeight: 54, alignItems: "center", borderTopWidth: 1 },
+  circuitCell: { paddingHorizontal: 8, paddingVertical: 8, textAlign: "right" },
+  circuitIndexCell: { width: 42, textAlign: "center", fontSize: 12 },
+  circuitNameCell: { width: 190 },
+  circuitShortCell: { width: 120, textAlign: "center", fontSize: 12 },
+  circuitFunctionCell: { width: 330, fontSize: 12, lineHeight: 18 },
+  circuitHeaderCell: { color: "#FFFFFF", fontSize: 12, fontWeight: "900", textAlign: "center" },
+  circuitArabicName: { fontSize: 13, fontWeight: "900", textAlign: "right" },
+  circuitEnglishName: { fontSize: 10, fontWeight: "600", marginTop: 2, textAlign: "right" },
   pipeTable: {
     width: "100%",
     borderWidth: 1,
