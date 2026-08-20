@@ -55,58 +55,73 @@ const afterLabel = (line: string, labels: string[]) => {
 function parsePlateText(rawText: string): Form {
   const lines = rawText.split(/\r?\n/).map(clean).filter(Boolean);
   const result = emptyForm();
-  const aliases: Record<FieldKey, string[]> = {
-    brand: ["brand / manufacturer", "brand manufacturer", "manufacturer", "brand", "ماركة", "الشركة"], model: ["model / model name", "model name", "model no", "model", "type", "موديل"],
-    indoorModel: ["indoor unit model", "indoor model", "indoor unit", "موديل الوحدة الداخلية", "الوحدة الداخلية"], outdoorModel: ["outdoor unit model", "outdoor model", "outdoor unit", "موديل الوحدة الخارجية", "الوحدة الخارجية"],
-    serial: ["serial number / s/n", "serial number", "serial no", "serial", "s/n", "الرقم التسلسلي", "رقم"], manufactureDate: ["date of manufacture", "manufacture date", "mfg date", "mfg", "تاريخ التصنيع"],
-    refrigerant: ["refrigerant", "freon", "الفريون", "غاز"], btu: ["capacity / btu/hr", "capacity (btu/hr)", "capacity btu/hr", "capacity", "btu/hr", "btu", "السعة", "تبريد"],
-    coolingCapacity: ["cooling capacity", "cooling power", "سعة التبريد", "قدرة التبريد"], heatingCapacity: ["heating capacity", "heating power", "سعة التدفئة", "قدرة التدفئة"],
-    voltage: ["rated voltage / power supply", "power supply", "rated voltage", "voltage", "volt", "v", "الجهد", "الفولت"], phase: ["phase", "ph", "فاز", "فازات"], frequency: ["rated frequency", "frequency", "freq", "hz", "التردد", "هرتز"],
-    coolingCurrent: ["cooling current", "cooling amps", "current cooling", "تيار التبريد"], heatingCurrent: ["heating current", "heating amps", "current heating", "تيار التدفئة"],
-    ampere: ["current / rated current", "rated current", "amp", "ampere", "current", "الأمبير", "امبير"], coolingPower: ["cooling power input", "cooling input", "دخل التبريد"], heatingPower: ["heating power input", "heating input", "دخل التدفئة"],
-    power: ["power input / input power", "power input", "input power", "power", "watt", "kw", "القدرة", "وات"], eer: ["eer"], cop: ["cop"], charge: ["refrigerant charge / quantity", "refrigerant charge", "charge", "kg", "الشحنة", "وزن"],
-    maxPressure: ["max operating pressure", "maximum operating pressure", "max pressure", "working pressure", "ضغط التشغيل", "الضغط الأقصى"], ipRating: ["ip rating / waterproof", "ip rating", "ip", "درجة الحماية"],
-    indoorWeight: ["indoor unit weight", "indoor weight", "وزن الوحدة الداخلية"], outdoorWeight: ["outdoor unit weight", "outdoor weight", "وزن الوحدة الخارجية"],
-  };
-  (Object.keys(aliases) as FieldKey[]).forEach((key) => {
+
+  const nextAfterExactLabel = (labels: string[]) => {
     for (let index = 0; index < lines.length; index += 1) {
-      const line = lines[index];
-      const labels = aliases[key];
-      const inlineValue = afterLabel(line, labels);
-      const normalizedLine = normalizeLabel(line);
-      const labelOnly = labels.some((label) => normalizedLine === normalizeLabel(label)) || looksLikeLabelRemainder(line);
-      const candidateNextLine = clean(lines[index + 1] ?? "");
-      const nextLineValue = labelOnly && !looksLikeLabelRemainder(candidateNextLine) ? candidateNextLine : "";
-      const value = clean(inlineValue || nextLineValue);
-      const alreadyUsed = value && Object.values(result).some((existing) => existing.toLowerCase() === value.toLowerCase());
-      if (value && value.length > 0 && value.length < 80 && value.toLowerCase() !== line.toLowerCase() && !looksLikeLabelRemainder(value) && !alreadyUsed) {
-        result[key] = value;
-        break;
+      const current = normalizeLabel(lines[index]);
+      const label = labels.find((item) => current === normalizeLabel(item));
+      if (!label) continue;
+      const next = clean(lines[index + 1] ?? '');
+      if (next && !looksLikeLabelRemainder(next)) return next;
+    }
+    return '';
+  };
+
+  const inline = (patterns: RegExp[]) => {
+    for (const line of lines) {
+      for (const pattern of patterns) {
+        const match = line.match(pattern);
+        const value = clean(match?.[1] ?? '');
+        if (value && !looksLikeLabelRemainder(value)) return value;
       }
     }
-  });
+    return '';
+  };
+
+  result.brand = inline([/^manufactured\s+by\s*[:=-]?\s*(.+)$/i, /^brand\s*(?:\/\s*manufacturer)?\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Manufactured By', 'Brand / Manufacturer']);
+  result.model = inline([/^model(?:\s*(?:no|number|name))?\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Model', 'Model Name', 'Model No', 'Model / Model Name']);
+  result.indoorModel = inline([/^(?:indoor\s+unit\s+model|indoor\s+model)\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Indoor Unit Model', 'Indoor Model']);
+  result.outdoorModel = inline([/^(?:outdoor\s+unit\s+model|outdoor\s+model)\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Outdoor Unit Model', 'Outdoor Model']);
+  result.serial = inline([/^serial(?:\s+number|\s+no)?\s*(?:\/\s*S\/?N)?\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Serial No', 'Serial Number', 'Serial Number / S/N']);
+  result.manufactureDate = inline([/^(?:mfg\s+date|date\s+of\s+manufacture|manufacture\s+date)\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['MFG Date', 'Date of Manufacture']);
+  result.refrigerant = inline([/^refrigerant\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Refrigerant']);
+  result.voltage = inline([/^(?:power\s+supply|rated\s+voltage)\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Power Supply : Volts- Ph-Hz', 'Power Supply', 'Rated Voltage / Power Supply']);
+  result.phase = inline([/^phase\s*(?:\/\s*ph)?\s*[:=-]\s*(.+)$/i]);
+  result.frequency = inline([/^(?:rated\s+)?frequency\s*[:=-]\s*(.+)$/i]);
+  result.eer = inline([/^eer\s*[:=-]\s*(.+)$/i]);
+  result.cop = inline([/^cop\s*[:=-]\s*(.+)$/i]);
+  result.ipRating = inline([/^ip\s+rating\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['IP Rating / Waterproof']);
+  result.maxPressure = inline([/^(?:max\s+operating\s+pressure|max\s+pressure)\s*[:=-]\s*(.+)$/i]);
+  result.charge = inline([/^(?:refrigerant\s+charge|charge|quantity)\s*[:=-]\s*(.+)$/i]);
+  result.indoorWeight = inline([/^indoor\s+unit\s+weight\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Indoor Unit Weight']);
+  result.outdoorWeight = inline([/^outdoor\s+unit\s+weight\s*[:=-]\s*(.+)$/i]) || nextAfterExactLabel(['Outdoor Unit Weight']);
+
+  const capacityLine = rawText.match(/(?:capacity|cooling\s+capacity)\s*\(?\s*(?:btu\s*\/?\s*hr)?\s*\)?\s*[:=-]?\s*(\d{4,6})\s*(?:btu\s*\/?\s*hr)?/i);
+  const anyCapacity = rawText.match(/\b(\d{4,6})\s*btu\s*\/?\s*hr\b/i);
+  result.btu = capacityLine?.[1] ? `${capacityLine[1]} Btu/hr` : anyCapacity?.[1] ? `${anyCapacity[1]} Btu/hr` : '';
+
   if (!result.brand) {
-    const knownBrand = lines.find((line) => /\b(zamil|carrier|daikin|midea|gree|lg|samsung|trane|york|toshiba|panasonic|haier|hisense|aux|mitsubishi|hitachi|general)\b/i.test(line));
-    if (knownBrand) result.brand = knownBrand;
+    const knownBrand = rawText.match(/\b(zamil|carrier|daikin|midea|gree|lg|samsung|trane|york|toshiba|panasonic|haier|hisense|aux|mitsubishi|hitachi|general)\b/i);
+    if (knownBrand) result.brand = knownBrand[1];
   }
   if (!result.model) {
-    const modelCode = rawText.match(/\b(?=[A-Z0-9-]{7,}\b)(?=[A-Z0-9-]*[A-Z])(?=[A-Z0-9-]*\d)[A-Z0-9-]{7,}\b/i);
+    const modelCode = rawText.match(/\bKYA\d{3}[A-Z0-9]{5,}\b/i) || rawText.match(/\b(?=[A-Z0-9-]{7,}\b)(?=[A-Z0-9-]*[A-Z])(?=[A-Z0-9-]*\d)[A-Z0-9-]{7,}\b/i);
     if (modelCode && !/^R(?:22|32|134A|404A|407C|410A|290|600A|454B|1234YF)$/i.test(modelCode[0])) result.model = modelCode[0];
   }
-  if (!result.btu) {
-    const capacityMatch = rawText.match(/\b(\d{4,6})\s*Btu\s*\/?\s*Hr\b/i);
-    if (capacityMatch) result.btu = `${capacityMatch[1]} Btu/hr`;
+  if (!result.serial) {
+    const serialCode = rawText.match(/\b[A-Z]{2,}\d{2,}[-–][A-Z0-9]{4,}\b/i);
+    if (serialCode) result.serial = serialCode[0];
   }
   if (!result.refrigerant) {
-    const match = rawText.match(/R[- ]?(?:22|32|134a|404a|407c|410a|290|600a|454b|1234yf)/i);
-    if (match) result.refrigerant = match[0].toUpperCase().replace(" ", "");
+    const match = rawText.match(/\bR[- ]?(?:22|32|134a|404a|407c|410a|290|600a|454b|1234yf)\b/i);
+    if (match) result.refrigerant = match[0].toUpperCase().replace(/\s+/g, '');
   }
   if (!result.frequency) {
-    const match = rawText.match(/(?:50|60)\s*Hz/i);
-    if (match) result.frequency = match[0].replace(/\s+/g, " ");
+    const match = rawText.match(/\b(?:50|60)\s*Hz\b/i) || rawText.match(/\b(?:208|220|230|240|380|400|415)\s*\/?\s*[^\n]{0,8}?\b(?:50|60)\b/i);
+    if (match) result.frequency = `${match[0].match(/(?:50|60)/)?.[0] ?? match[0]} Hz`;
   }
   if (!result.voltage) {
-    const match = rawText.match(/\b(?:1?10|115|220|230|240|380|400|415)\s*V(?:AC)?\b/i);
+    const match = rawText.match(/\b(?:208|220|230|240|380|400|415)(?:\s*\/\s*(?:208|220|230|240))?\s*(?:V|VAC)?\b/i);
     if (match) result.voltage = match[0];
   }
   return result;
