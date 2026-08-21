@@ -12,6 +12,7 @@ const references = [
   ["حاسبات HVAC", "نتيجة دقيقة", "calculator", "calculators", "#7C3AED"],
   ["الفريونات والزيوت", "مرجع التشغيل", "snowflake", "refrigerants", "#0891B2"],
   ["الخامات", "إدارة المواد", "settings", "materials", "#16A34A"],
+  ["فلاتر الهواء", "أنواع ومراحل الترشيح", "wind", "air-filters", "#0891B2"],
   ["أقطار المواسير", "بوصة وملليمتر", "settings", "pipe-diameters", "#0F766E"],
   ["دليل الضغوط والأمبير", "قراءات التشغيل", "bolt.fill", "pressure-amp-guide", "#D97706"],
   ["مرجع الدوائر", "تبريد وكهرباء وكنترول", "book.fill", "circuit-reference", "#7C3AED"],

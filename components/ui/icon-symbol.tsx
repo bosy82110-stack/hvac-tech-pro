@@ -7,6 +7,7 @@ const aliases: Record<string, ComponentProps<typeof Ionicons>["name"]> = {
   warning: "warning-outline",
   "fan.fill": "sync-outline",
   snowflake: "snow-outline",
+  wind: "filter-outline",
   settings: "settings-outline",
   "bolt.fill": "flash-outline",
   "book.fill": "book-outline",

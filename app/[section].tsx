@@ -34,6 +34,27 @@ import {
   type ManagedBrand,
 } from "@/shared/hvac-data";
 import { compressorModels } from "@/shared/compressor-data";
+import { airFilterComparisonIds, airFilters, airflowStages } from "@/shared/air-filter-data";
+
+function FilterIllustration({ kind, color, large = false }: { kind: "carbon" | "pocket" | "pleated" | "hepa" | "metal"; color: string; large?: boolean }) {
+  const width = large ? 210 : 78;
+  const height = large ? 150 : 70;
+  return (
+    <View style={[styles.filterArt, { width, height, backgroundColor: `${color}18`, borderColor: color }]}>
+      {kind === "pocket" ? (
+        <View style={styles.pocketArtRow}>{[0, 1, 2, 3].map((item) => <View key={item} style={[styles.pocketShape, { backgroundColor: color, height: large ? 92 : 42, width: large ? 31 : 12 }]} />)}</View>
+      ) : kind === "pleated" ? (
+        <View style={styles.pleatArtRow}>{Array.from({ length: large ? 12 : 8 }).map((_, item) => <View key={item} style={[styles.pleatLine, { backgroundColor: color }]} />)}</View>
+      ) : kind === "hepa" ? (
+        <View style={[styles.hepaArt, { borderColor: color }]}><View style={[styles.hepaCore, { backgroundColor: color }]} /><Text style={[styles.hepaMark, { color }]}>H</Text></View>
+      ) : kind === "metal" ? (
+        <View style={[styles.metalArt, { borderColor: color }]}>{Array.from({ length: large ? 9 : 5 }).map((_, item) => <View key={`h-${item}`} style={[styles.metalLine, { backgroundColor: color, transform: [{ rotate: "45deg" }] }]} />)}{Array.from({ length: large ? 9 : 5 }).map((_, item) => <View key={`v-${item}`} style={[styles.metalLine, { backgroundColor: color, transform: [{ rotate: "-45deg" }] }]} />)}</View>
+      ) : (
+        <View style={[styles.carbonArt, { backgroundColor: color }]}><View style={styles.carbonDots}>{Array.from({ length: large ? 25 : 10 }).map((_, item) => <View key={item} style={styles.carbonDot} />)}</View></View>
+      )}
+    </View>
+  );
+}
 
 type MaterialRecord = CustomMaterial & {
   name: string;
@@ -388,6 +409,11 @@ const info: Record<string, { title: string; subtitle: string; icon: any }> = {
     title: "قطع الغيار",
     subtitle: "الوظيفة والمطابقة والبدائل",
     icon: "settings",
+  },
+  "air-filters": {
+    title: "فلاتر الهواء",
+    subtitle: "مرجع أنواع الفلاتر ومراحل الترشيح داخل AHU",
+    icon: "wind",
   },
   materials: {
     title: "الخامات",
@@ -999,6 +1025,8 @@ export default function SectionScreen() {
     null,
   );
   const [selectedPart, setSelectedPart] = useState<string | null>(null);
+  const [selectedAirFilter, setSelectedAirFilter] = useState<string | null>(null);
+  const [comparisonFilterIds, setComparisonFilterIds] = useState<string[]>([...airFilterComparisonIds]);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [managedBrands, setManagedBrands] = useState<ManagedBrand[]>(brands);
   const [customMaterials, setCustomMaterials] = useState<CustomMaterial[]>([]);
@@ -2612,6 +2640,69 @@ export default function SectionScreen() {
                 />
               </Pressable>
             ))}
+        </View>
+      );
+    }
+    if (key === "air-filters") {
+      const selected = airFilters.find((item) => item.id === selectedAirFilter);
+      const comparison = comparisonFilterIds.map((id) => airFilters.find((item) => item.id === id)).filter(Boolean) as typeof airFilters;
+      const toggleComparison = (id: string) => setComparisonFilterIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+      const renderBulletList = (items: string[]) => <View style={styles.filterBulletList}>{items.map((item) => <Text key={item} style={[styles.detailsRow, { color: colors.foreground }]}>• {item}</Text>)}</View>;
+      return (
+        <View>
+          {selected ? (
+            <>
+              <Pressable onPress={() => setSelectedAirFilter(null)} style={styles.backRow}>
+                <IconSymbol name="arrow.left" size={18} color={colors.primary} />
+                <Text style={[styles.backText, { color: colors.primary }]}>العودة إلى فلاتر الهواء · Back</Text>
+              </Pressable>
+              <View style={[styles.detailCard, { backgroundColor: colors.surface, borderColor: selected.color }]}>
+                <FilterIllustration kind={selected.iconKind} color={selected.color} large />
+                <Text style={[styles.detailsTitle, { color: colors.foreground }]}>{selected.nameAr}</Text>
+                <Text style={[styles.filterEnglishTitle, { color: selected.color }]}>{selected.nameEn}</Text>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>الوظيفة · Function</Text>
+                <Text style={[styles.detailsBody, { color: colors.foreground }]}>{selected.functionAr}</Text>
+                <Text style={[styles.bilingualBody, { color: colors.muted }]}>{selected.functionEn}</Text>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>مكانه في الـ AHU · AHU Position</Text>
+                <Text style={[styles.detailsBody, { color: colors.foreground }]}>{selected.ahuPositionAr}</Text>
+                <Text style={[styles.bilingualBody, { color: colors.muted }]}>{selected.ahuPositionEn}</Text>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>درجة الفلترة · Rating</Text>
+                <View style={[styles.ratingPill, { backgroundColor: `${selected.color}18`, borderColor: `${selected.color}55` }]}><Text style={[styles.ratingText, { color: selected.color }]}>{selected.ratingLabel}: {selected.ratingValue}</Text></View>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>يستخدم فين؟ · Applications</Text>
+                <Text style={[styles.detailsBody, { color: colors.foreground }]}>{selected.usesAr.join(" · ")}</Text>
+                <Text style={[styles.bilingualBody, { color: colors.muted }]}>{selected.usesEn.join(" · ")}</Text>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>علامات انسداد الفلتر · Clogging Signs</Text>
+                {renderBulletList(selected.cloggingSignsAr)}
+                <Text style={[styles.bilingualBody, { color: colors.muted }]}>{selected.cloggingSignsEn.join(" · ")}</Text>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>الصيانة · Maintenance</Text>
+                {renderBulletList(selected.maintenanceAr)}
+                <Text style={[styles.bilingualBody, { color: colors.muted }]}>{selected.maintenanceEn.join(" · ")}</Text>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>متى يتم استبداله؟ · Replacement</Text>
+                <Text style={[styles.detailsBody, { color: colors.foreground }]}>{selected.replacementAr}</Text>
+                <Text style={[styles.bilingualBody, { color: colors.muted }]}>{selected.replacementEn}</Text>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>ملاحظات الفني · Technician Notes</Text>
+                {renderBulletList(selected.notesAr)}
+                <Text style={[styles.bilingualBody, { color: colors.muted }]}>{selected.notesEn.join(" · ")}</Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={[styles.sectionHeading, { color: colors.foreground }]}>أنواع فلاتر الهواء · Air Filter Types</Text>
+              <Text style={[styles.sectionHint, { color: colors.muted }]}>اختَر نوع الفلتر لعرض الوظيفة ومكانه في AHU والصيانة العملية.</Text>
+              <View style={styles.filterGrid}>{airFilters.map((item) => <Pressable key={item.id} onPress={() => setSelectedAirFilter(item.id)} style={({ pressed }) => [styles.filterTile, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.72 }]}><FilterIllustration kind={item.iconKind} color={item.color} /><Text style={[styles.filterTileTitle, { color: colors.foreground }]}>{item.nameAr}</Text><Text style={[styles.filterTileEnglish, { color: item.color }]}>{item.nameEn}</Text><Text style={[styles.filterTileSub, { color: colors.muted }]}>{item.shortAr}</Text></Pressable>)}</View>
+              <View style={[styles.filterPanel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>🔍 مقارنة الفلاتر · Compare Filters</Text>
+                <Text style={[styles.sectionHint, { color: colors.muted }]}>اختَر فلترين أو أكثر لعرض الفرق في جدول واحد.</Text>
+                <View style={styles.compareSelectors}>{airFilters.filter((item) => ["pleated", "pocket", "hepa"].includes(item.id)).map((item) => <Pressable key={item.id} onPress={() => toggleComparison(item.id)} style={[styles.compareChip, { borderColor: item.color, backgroundColor: comparisonFilterIds.includes(item.id) ? `${item.color}22` : "transparent" }]}><Text style={{ color: item.color, fontWeight: "800" }}>{item.nameAr}</Text></Pressable>)}</View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}><View style={styles.compareTable}><View style={styles.compareRow}>{["البند · Field", ...comparison.map((item) => item.nameEn)].map((text, index) => <Text key={`${text}-${index}`} style={[styles.compareCell, styles.compareHeader, { color: colors.foreground }]}>{text}</Text>)}</View>{[["المكان · Position", ...comparison.map((item) => item.ahuPositionAr)], ["التصنيف · Rating", ...comparison.map((item) => `${item.ratingLabel}: ${item.ratingValue}`)], ["الاستخدام · Use", ...comparison.map((item) => item.usesAr.slice(0, 2).join("، "))], ["الاستبدال · Replace", ...comparison.map((item) => item.replacementAr)]].map((row, rowIndex) => <View key={rowIndex} style={[styles.compareRow, { borderTopColor: colors.border }]}>{row.map((text, cellIndex) => <Text key={`${rowIndex}-${cellIndex}`} style={[styles.compareCell, { color: colors.foreground }]}>{text}</Text>)}</View>)}</View></ScrollView>
+              </View>
+              <View style={[styles.filterPanel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Text style={[styles.detailsLabel, { color: colors.primary }]}>مسار الهواء داخل الـ AHU · Airflow Path</Text>
+                <Text style={[styles.sectionHint, { color: colors.muted }]}>المسار النموذجي من الهواء النقي حتى هواء التغذية، والفلتر الحالي يُحدد باللون.</Text>
+                <View style={styles.airflowPath}>{airflowStages.map((stage, index) => <View key={stage.id} style={styles.airflowStageWrap}><View style={[styles.airflowStage, { backgroundColor: stage.id === selectedAirFilter ? `${airFilters.find((item) => item.id === selectedAirFilter)?.color ?? colors.primary}25` : colors.background, borderColor: stage.id === selectedAirFilter ? (airFilters.find((item) => item.id === selectedAirFilter)?.color ?? colors.primary) : colors.border }]}><Text style={[styles.airflowAr, { color: colors.foreground }]}>{stage.ar}</Text><Text style={[styles.airflowEn, { color: colors.muted }]}>{stage.en}</Text></View>{index < airflowStages.length - 1 && <Text style={[styles.airflowArrow, { color: colors.primary }]}>→</Text>}</View>)}</View>
+              </View>
+            </>
+          )}
         </View>
       );
     }
@@ -4265,6 +4356,42 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   detailsBody: { fontSize: 14, lineHeight: 22, textAlign: "right" },
+  bilingualBody: { fontSize: 12, lineHeight: 19, textAlign: "right", marginTop: 3 },
+  filterEnglishTitle: { fontSize: 14, fontWeight: "800", textAlign: "right", marginBottom: 10 },
+  filterArt: { borderWidth: 1, borderRadius: 16, alignItems: "center", justifyContent: "center", overflow: "hidden", marginBottom: 10 },
+  pocketArtRow: { flexDirection: "row", alignItems: "flex-end", gap: 3 },
+  pocketShape: { borderRadius: 4, opacity: 0.82 },
+  pleatArtRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  pleatLine: { width: 3, height: "72%", borderRadius: 2, transform: [{ skewX: "-18deg" }] },
+  hepaArt: { width: "72%", height: "68%", borderWidth: 2, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  hepaCore: { position: "absolute", width: "70%", height: 4, opacity: 0.35 },
+  hepaMark: { fontSize: 28, fontWeight: "900" },
+  metalArt: { width: "74%", height: "70%", borderWidth: 2, borderRadius: 5, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  metalLine: { position: "absolute", width: "145%", height: 1, opacity: 0.55 },
+  carbonArt: { width: "72%", height: "64%", borderRadius: 7, padding: 7, justifyContent: "center" },
+  carbonDots: { flexDirection: "row", flexWrap: "wrap", gap: 5, justifyContent: "center" },
+  carbonDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: "#CBD5E1" },
+  filterGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 14 },
+  filterTile: { width: "48%", minHeight: 172, borderRadius: 17, borderWidth: 1, padding: 10, alignItems: "center" },
+  filterTileTitle: { fontSize: 14, fontWeight: "900", textAlign: "center" },
+  filterTileEnglish: { fontSize: 11, fontWeight: "800", textAlign: "center", marginTop: 3 },
+  filterTileSub: { fontSize: 10, lineHeight: 15, textAlign: "center", marginTop: 5 },
+  filterPanel: { borderRadius: 18, borderWidth: 1, padding: 14, marginBottom: 14, gap: 6 },
+  filterBulletList: { gap: 3, marginTop: 2 },
+  ratingPill: { borderWidth: 1, borderRadius: 11, paddingHorizontal: 10, paddingVertical: 8, alignSelf: "flex-end", marginTop: 3 },
+  ratingText: { fontSize: 12, fontWeight: "900", textAlign: "right" },
+  compareSelectors: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 7, marginBottom: 8 },
+  compareChip: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 8 },
+  compareTable: { minWidth: 570, borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, overflow: "hidden" },
+  compareRow: { flexDirection: "row-reverse", borderTopWidth: StyleSheet.hairlineWidth },
+  compareCell: { width: 142, minHeight: 58, padding: 8, fontSize: 11, lineHeight: 16, textAlign: "right", borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: "#CBD5E1" },
+  compareHeader: { fontWeight: "900", minHeight: 42 },
+  airflowPath: { flexDirection: "row", alignItems: "center", paddingVertical: 10, minWidth: 680 },
+  airflowStageWrap: { flexDirection: "row", alignItems: "center" },
+  airflowStage: { minWidth: 94, borderWidth: 1, borderRadius: 12, padding: 8, alignItems: "center" },
+  airflowAr: { fontSize: 11, fontWeight: "900", textAlign: "center" },
+  airflowEn: { fontSize: 9, textAlign: "center", marginTop: 2 },
+  airflowArrow: { fontSize: 20, fontWeight: "900", marginHorizontal: 5 },
   cylinderDisclaimer: {
     width: "100%",
     fontSize: 11,
