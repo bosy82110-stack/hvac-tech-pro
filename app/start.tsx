@@ -68,7 +68,8 @@ export default function StartScreen() {
       <Image
         source={require("@/assets/images/launch-screen.png")}
         resizeMode="cover"
-        style={[styles.image, { width, height }]}
+        fadeDuration={0}
+        style={styles.image}
       />
       <Pressable
         accessibilityRole="button"
@@ -101,9 +102,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#031A35",
   },
   image: {
-    position: "absolute",
-    top: 0,
-    left: 0,
+    ...StyleSheet.absoluteFillObject,
+    width: undefined,
+    height: undefined,
   },
   startButton: {
     position: "absolute",
