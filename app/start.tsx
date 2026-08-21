@@ -5,18 +5,15 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
+  Text,
   View,
-  useWindowDimensions,
 } from "react-native";
 
-// Bumped so existing installations see the corrected start screen once.
 const START_SEEN_KEY = "hvac_start_screen_seen_v3";
 
 export default function StartScreen() {
-  const { width, height } = useWindowDimensions();
   const [checking, setChecking] = useState(true);
   const [opening, setOpening] = useState(false);
   const leavingRef = useRef(false);
@@ -33,13 +30,10 @@ export default function StartScreen() {
   };
 
   const goToHome = () => {
-    // Let the current screen finish its native press/unmount cycle first.
     setTimeout(() => {
       try {
-        // The root URL resolves to the index screen inside the tabs group.
         router.replace("/");
       } catch {
-        // Fallback for expo-router versions that require the group path.
         router.replace("/(tabs)");
       }
     }, 80);
@@ -62,7 +56,6 @@ export default function StartScreen() {
         player.play();
       })
       .catch(() => {
-        // If storage is unavailable, the first-launch screen should still work.
         if (mounted) {
           setChecking(false);
           player.volume = 0.72;
@@ -85,7 +78,7 @@ export default function StartScreen() {
     try {
       await AsyncStorage.setItem(START_SEEN_KEY, "1");
     } catch {
-      // Navigation must continue even if local storage briefly fails.
+      // Navigation continues even if local storage briefly fails.
     }
 
     goToHome();
@@ -103,27 +96,33 @@ export default function StartScreen() {
   return (
     <View style={styles.container}>
       <StatusBar hidden />
-      <Image
-        source={require("@/assets/images/launch-screen.png")}
-        resizeMode="cover"
-        fadeDuration={0}
-        style={styles.image}
-      />
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="ابدأ الآن"
-        onPress={openApp}
-        disabled={opening}
-        style={({ pressed }) => [
-          styles.startButton,
-          {
-            left: width * 0.08,
-            right: width * 0.08,
-            bottom: Math.max(22, height * 0.055),
-            opacity: pressed || opening ? 0.02 : 0.01,
-          },
-        ]}
-      />
+      <View style={styles.glowTop} />
+      <View style={styles.content}>
+        <View style={styles.logoMark}>
+          <Text style={styles.logoSnow}>❄</Text>
+          <Text style={styles.logoBolt}>ϟ</Text>
+        </View>
+        <Text style={styles.title}>HVAC TECH PRO</Text>
+        <Text style={styles.subtitle}>مساعدك الفني في كل مهمة</Text>
+        <Text style={styles.description}>
+          أدوات وحسابات وتشخيصات متخصصة لفنيي التكييف والتبريد
+        </Text>
+      </View>
+      <View style={styles.bottomArea}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="ابدأ الآن"
+          onPress={openApp}
+          disabled={opening}
+          style={({ pressed }) => [
+            styles.startButton,
+            { opacity: pressed || opening ? 0.7 : 1 },
+          ]}
+        >
+          <Text style={styles.startButtonText}>{opening ? "جارٍ الفتح..." : "ابدأ الآن"}</Text>
+        </Pressable>
+        <Text style={styles.credit}>تصميم وتنفيذ أحمد زكريا</Text>
+      </View>
     </View>
   );
 }
@@ -132,6 +131,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#031A35",
+    paddingHorizontal: 24,
+    paddingTop: 56,
+    paddingBottom: 30,
   },
   loading: {
     flex: 1,
@@ -139,14 +141,93 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#031A35",
   },
-  image: {
-    ...StyleSheet.absoluteFillObject,
-    width: undefined,
-    height: undefined,
+  glowTop: {
+    position: "absolute",
+    top: -180,
+    alignSelf: "center",
+    width: 420,
+    height: 420,
+    borderRadius: 210,
+    backgroundColor: "#0A4D91",
+    opacity: 0.24,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoMark: {
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#0B5DB3",
+    borderWidth: 2,
+    borderColor: "#1687FF",
+    shadowColor: "#1687FF",
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  logoSnow: {
+    color: "#BFE5FF",
+    fontSize: 52,
+    lineHeight: 56,
+  },
+  logoBolt: {
+    position: "absolute",
+    color: "#FFD23F",
+    fontSize: 48,
+    fontWeight: "900",
+    transform: [{ translateY: 3 }],
+  },
+  title: {
+    marginTop: 28,
+    color: "#FFFFFF",
+    fontSize: 30,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+  },
+  subtitle: {
+    marginTop: 14,
+    color: "#55B7FF",
+    fontSize: 24,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  description: {
+    maxWidth: 330,
+    marginTop: 18,
+    color: "#D8E9F8",
+    fontSize: 16,
+    lineHeight: 27,
+    textAlign: "center",
+  },
+  bottomArea: {
+    alignItems: "center",
   },
   startButton: {
-    position: "absolute",
-    height: 74,
-    borderRadius: 28,
+    width: "100%",
+    minHeight: 64,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#1687FF",
+    shadowColor: "#1687FF",
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 7,
+  },
+  startButtonText: {
+    color: "#FFFFFF",
+    fontSize: 23,
+    fontWeight: "800",
+  },
+  credit: {
+    marginTop: 18,
+    color: "#9FC8E8",
+    fontSize: 15,
+    textAlign: "center",
   },
 });
