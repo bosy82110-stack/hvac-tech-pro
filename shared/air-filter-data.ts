@@ -6,6 +6,7 @@ export type AirFilter = {
   shortEn: string;
   color: string;
   iconKind: "carbon" | "pocket" | "pleated" | "hepa" | "metal";
+  image: number;
   functionAr: string;
   functionEn: string;
   ahuPositionAr: string;
@@ -42,6 +43,7 @@ export const airFilters: AirFilter[] = [
     shortEn: "Odor and gas removal",
     color: "#475569",
     iconKind: "carbon",
+    image: require("../assets/air-filters/carbon-filter.jpg"),
     functionAr: "يمتص الروائح والغازات العضوية وبعض المركبات الكيميائية المتطايرة باستخدام الكربون المنشط.",
     functionEn: "Adsorbs odors, organic gases, and selected volatile compounds using activated carbon.",
     ahuPositionAr: "بعد فلتر الـ Pre أو كمرحلة معالجة روائح حسب تصميم وحدة مناولة الهواء.",
@@ -67,6 +69,7 @@ export const airFilters: AirFilter[] = [
     shortEn: "Medium filtration with high dust holding",
     color: "#0E7490",
     iconKind: "pocket",
+    image: require("../assets/air-filters/pocket-filter.jpg"),
     functionAr: "يحجز الجسيمات والغبار بكفاءة أعلى من الفلتر الأولي بفضل الجيوب ذات المساحة الكبيرة.",
     functionEn: "Captures dust and particles more efficiently than a pre-filter through large-area pockets.",
     ahuPositionAr: "بعد فلتر الـ Pre وقبل مرحلة HEPA أو الفلتر النهائي.",
@@ -92,6 +95,7 @@ export const airFilters: AirFilter[] = [
     shortEn: "General-purpose intermediate filtration",
     color: "#2563EB",
     iconKind: "pleated",
+    image: require("../assets/air-filters/pleated-filter.jpg"),
     functionAr: "يحجز الغبار والجسيمات المحمولة بالهواء ويحمي الملفات والفلاتر النهائية.",
     functionEn: "Captures airborne dust and protects coils and final filters.",
     ahuPositionAr: "بعد فلتر الـ Pre أو كفلتر متوسط قبل فلتر الجيب أو HEPA.",
@@ -117,6 +121,7 @@ export const airFilters: AirFilter[] = [
     shortEn: "Final filtration for very fine particles",
     color: "#7C3AED",
     iconKind: "hepa",
+    image: require("../assets/air-filters/hepa-filter.jpg"),
     functionAr: "يحتجز نسبة عالية جدًا من الجسيمات الدقيقة، ويُستخدم كمرحلة نهائية عندما تكون جودة الهواء الحرجة مطلوبة.",
     functionEn: "Removes a very high fraction of fine particles as a final stage where critical air cleanliness is required.",
     ahuPositionAr: "مرحلة نهائية بعد الفلاتر السابقة، وقد يكون طرفيًا عند نقطة التغذية.",
@@ -142,6 +147,7 @@ export const airFilters: AirFilter[] = [
     shortEn: "Cleanable primary filtration",
     color: "#16A34A",
     iconKind: "metal",
+    image: require("../assets/air-filters/metal-mesh-filter.jpg"),
     functionAr: "يحجز الأتربة والجسيمات الكبيرة ويحمي المكونات الداخلية كمرحلة أولية قابلة للتنظيف.",
     functionEn: "Captures coarse dust and protects internal components as a cleanable primary stage.",
     ahuPositionAr: "أول مرحلة عند مدخل الهواء أو قبل فلتر الـ Pre.",

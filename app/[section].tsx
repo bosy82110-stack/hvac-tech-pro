@@ -2673,7 +2673,7 @@ export default function SectionScreen() {
                 <Text style={[styles.backText, { color: colors.primary }]}>العودة إلى فلاتر الهواء · Back</Text>
               </Pressable>
               <View style={[styles.detailCard, { backgroundColor: colors.surface, borderColor: selected.color }]}>
-                <FilterIllustration kind={selected.iconKind} color={selected.color} large />
+                <Image source={selected.image} style={styles.filterPhotoLarge} resizeMode="contain" />
                 <Text style={[styles.detailsTitle, { color: colors.foreground }]}>{selected.nameAr}</Text>
                 <Text style={[styles.filterEnglishTitle, { color: selected.color }]}>{selected.nameEn}</Text>
                 <Text style={[styles.detailsLabel, { color: colors.primary }]}>الوظيفة · Function</Text>
@@ -2705,7 +2705,7 @@ export default function SectionScreen() {
             <>
               <Text style={[styles.sectionHeading, { color: colors.foreground }]}>أنواع فلاتر الهواء · Air Filter Types</Text>
               <Text style={[styles.sectionHint, { color: colors.muted }]}>اختَر نوع الفلتر لعرض الوظيفة ومكانه في AHU والصيانة العملية.</Text>
-              <View style={styles.filterGrid}>{airFilters.map((item) => <Pressable key={item.id} onPress={() => setSelectedAirFilter(item.id)} style={({ pressed }) => [styles.filterTile, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.72 }]}><FilterIllustration kind={item.iconKind} color={item.color} /><Text style={[styles.filterTileTitle, { color: colors.foreground }]}>{item.nameAr}</Text><Text style={[styles.filterTileEnglish, { color: item.color }]}>{item.nameEn}</Text><Text style={[styles.filterTileSub, { color: colors.muted }]}>{item.shortAr}</Text></Pressable>)}</View>
+              <View style={styles.filterGrid}>{airFilters.map((item) => <Pressable key={item.id} onPress={() => setSelectedAirFilter(item.id)} style={({ pressed }) => [styles.filterTile, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.72 }]}><Image source={item.image} style={styles.filterPhoto} resizeMode="contain" /><Text style={[styles.filterTileTitle, { color: colors.foreground }]}>{item.nameAr}</Text><Text style={[styles.filterTileEnglish, { color: item.color }]}>{item.nameEn}</Text><Text style={[styles.filterTileSub, { color: colors.muted }]}>{item.shortAr}</Text></Pressable>)}</View>
               <View style={[styles.filterPanel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <Text style={[styles.detailsLabel, { color: colors.primary }]}>🔍 مقارنة الفلاتر · Compare Filters</Text>
                 <Text style={[styles.sectionHint, { color: colors.muted }]}>اختَر فلترين أو أكثر لعرض الفرق في جدول واحد.</Text>
@@ -4377,6 +4377,8 @@ const styles = StyleSheet.create({
   bilingualBody: { fontSize: 12, lineHeight: 19, textAlign: "right", marginTop: 3 },
   filterEnglishTitle: { fontSize: 14, fontWeight: "800", textAlign: "right", marginBottom: 10 },
   filterArt: { borderWidth: 1, borderRadius: 16, alignItems: "center", justifyContent: "center", overflow: "hidden", marginBottom: 10 },
+  filterPhoto: { width: "100%", height: 88, borderRadius: 12, marginBottom: 8 },
+  filterPhotoLarge: { width: "100%", height: 190, borderRadius: 16, marginBottom: 12 },
   pocketArtRow: { flexDirection: "row", alignItems: "flex-end", gap: 3 },
   pocketShape: { borderRadius: 4, opacity: 0.82 },
   pleatArtRow: { flexDirection: "row", alignItems: "center", gap: 4 },
