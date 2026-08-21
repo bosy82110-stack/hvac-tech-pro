@@ -2543,6 +2543,22 @@ export default function SectionScreen() {
       const selected = spareParts.find((item) => item.id === selectedPart);
       return (
         <View>
+          {!selected && (
+            <Pressable
+              onPress={() => router.push({ pathname: "/[section]", params: { section: "air-filters" } } as any)}
+              style={({ pressed }) => [styles.airFilterPartsCard, { backgroundColor: colors.surface, borderColor: "#0891B2" }, pressed && { opacity: 0.72 }]}
+            >
+              <View style={[styles.airFilterPartsIcon, { backgroundColor: "#E0F7FA" }]}>
+                <IconSymbol name="wind" size={26} color="#0891B2" />
+              </View>
+              <View style={styles.cardCopy}>
+                <Text style={[styles.cardTitle, { color: colors.foreground }]}>فلاتر الهواء</Text>
+                <Text style={[styles.cardSub, { color: "#0891B2" }]}>Air Filters · أنواع ومراحل الترشيح داخل AHU</Text>
+                <Text style={[styles.note, { color: colors.muted }]}>اضغط لعرض الأنواع والتفاصيل والمقارنة</Text>
+              </View>
+              <IconSymbol name="chevron.right" size={21} color="#0891B2" />
+            </Pressable>
+          )}
           {selected && (
             <>
               <Pressable
@@ -4137,6 +4153,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   cardCopy: { flex: 1, alignItems: "flex-end" },
+  airFilterPartsCard: { minHeight: 82, borderWidth: 1, borderRadius: 18, padding: 12, marginBottom: 14, flexDirection: "row-reverse", alignItems: "center", gap: 10 },
+  airFilterPartsIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   cardTitle: { fontSize: 14, fontWeight: "800", textAlign: "right" },
   cardSub: { fontSize: 11, marginTop: 4, textAlign: "right" },
   searchInput: {
