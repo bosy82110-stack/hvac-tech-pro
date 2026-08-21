@@ -37,10 +37,17 @@ export default function StartScreen() {
   };
 
   useEffect(() => {
-    player.volume = 0.72;
-    player.play();
+    const timer = setTimeout(() => {
+      try {
+        player.volume = 0.72;
+        player.play();
+      } catch {
+        // Audio is optional; the start screen must remain usable if it fails.
+      }
+    }, 350);
 
     return () => {
+      clearTimeout(timer);
       if (!leavingRef.current) stopAudioSafely();
     };
   }, [player]);
