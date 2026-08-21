@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAudioPlayer } from "expo-audio";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -12,45 +12,83 @@ import {
   useWindowDimensions,
 } from "react-native";
 
-// Bumped for this onboarding fix so existing installations see the corrected start screen once.
+// Bumped so existing installations see the corrected start screen once.
 const START_SEEN_KEY = "hvac_start_screen_seen_v3";
 
 export default function StartScreen() {
   const { width, height } = useWindowDimensions();
   const [checking, setChecking] = useState(true);
   const [opening, setOpening] = useState(false);
+  const leavingRef = useRef(false);
   const player = useAudioPlayer(
     require("@/assets/audio/start-screen-hvac-jingle.mp3"),
   );
 
+  const stopAudioSafely = () => {
+    try {
+      player.pause();
+    } catch {
+      // The native audio object may already be released during navigation.
+    }
+  };
+
+  const goToHome = () => {
+    // Let the current screen finish its native press/unmount cycle first.
+    setTimeout(() => {
+      try {
+        // The root URL resolves to the index screen inside the tabs group.
+        router.replace("/");
+      } catch {
+        // Fallback for expo-router versions that require the group path.
+        router.replace("/(tabs)");
+      }
+    }, 80);
+  };
+
   useEffect(() => {
     let mounted = true;
 
-    AsyncStorage.getItem(START_SEEN_KEY).then((value) => {
-      if (!mounted) return;
-      setChecking(false);
-      if (value === "1") {
-        router.replace("/(tabs)");
-        return;
-      }
+    AsyncStorage.getItem(START_SEEN_KEY)
+      .then((value) => {
+        if (!mounted) return;
+        setChecking(false);
+        if (value === "1") {
+          leavingRef.current = true;
+          goToHome();
+          return;
+        }
 
-      // Start the five-second professional HVAC jingle when this screen is visible.
-      player.volume = 0.72;
-      player.play();
-    });
+        player.volume = 0.72;
+        player.play();
+      })
+      .catch(() => {
+        // If storage is unavailable, the first-launch screen should still work.
+        if (mounted) {
+          setChecking(false);
+          player.volume = 0.72;
+          player.play();
+        }
+      });
 
     return () => {
       mounted = false;
-      player.pause();
+      if (!leavingRef.current) stopAudioSafely();
     };
   }, [player]);
 
   const openApp = async () => {
     if (opening) return;
     setOpening(true);
-    player.pause();
-    await AsyncStorage.setItem(START_SEEN_KEY, "1");
-    router.replace("/(tabs)");
+    leavingRef.current = true;
+    stopAudioSafely();
+
+    try {
+      await AsyncStorage.setItem(START_SEEN_KEY, "1");
+    } catch {
+      // Navigation must continue even if local storage briefly fails.
+    }
+
+    goToHome();
   };
 
   if (checking) {
