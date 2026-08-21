@@ -28,11 +28,7 @@ export default function StartScreen() {
 
   const goToHome = () => {
     setTimeout(() => {
-      try {
-        router.replace("/");
-      } catch {
-        router.replace("/(tabs)");
-      }
+      router.replace("/(tabs)");
     }, 80);
   };
 
