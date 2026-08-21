@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAudioPlayer } from "expo-audio";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -11,10 +10,8 @@ import {
   View,
 } from "react-native";
 
-const START_SEEN_KEY = "hvac_start_screen_seen_v3";
-
 export default function StartScreen() {
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [opening, setOpening] = useState(false);
   const leavingRef = useRef(false);
   const player = useAudioPlayer(
@@ -40,46 +37,19 @@ export default function StartScreen() {
   };
 
   useEffect(() => {
-    let mounted = true;
-
-    AsyncStorage.getItem(START_SEEN_KEY)
-      .then((value) => {
-        if (!mounted) return;
-        setChecking(false);
-        if (value === "1") {
-          leavingRef.current = true;
-          goToHome();
-          return;
-        }
-
-        player.volume = 0.72;
-        player.play();
-      })
-      .catch(() => {
-        if (mounted) {
-          setChecking(false);
-          player.volume = 0.72;
-          player.play();
-        }
-      });
+    player.volume = 0.72;
+    player.play();
 
     return () => {
-      mounted = false;
       if (!leavingRef.current) stopAudioSafely();
     };
   }, [player]);
 
-  const openApp = async () => {
+  const openApp = () => {
     if (opening) return;
     setOpening(true);
     leavingRef.current = true;
     stopAudioSafely();
-
-    try {
-      await AsyncStorage.setItem(START_SEEN_KEY, "1");
-    } catch {
-      // Navigation continues even if local storage briefly fails.
-    }
 
     goToHome();
   };
