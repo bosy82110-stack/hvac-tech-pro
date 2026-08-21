@@ -12,8 +12,8 @@ import {
   useWindowDimensions,
 } from "react-native";
 
-// Versioned key ensures users who already opened an older build can see this new screen once.
-const START_SEEN_KEY = "hvac_start_screen_seen_v2";
+// Bumped for this onboarding fix so existing installations see the corrected start screen once.
+const START_SEEN_KEY = "hvac_start_screen_seen_v3";
 
 export default function StartScreen() {
   const { width, height } = useWindowDimensions();
@@ -34,7 +34,7 @@ export default function StartScreen() {
         return;
       }
 
-      // Start the three-second professional HVAC jingle when this screen is visible.
+      // Start the five-second professional HVAC jingle when this screen is visible.
       player.volume = 0.72;
       player.play();
     });

@@ -9,7 +9,7 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar hidden />
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack initialRouteName="start" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="start" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="[section]" />
