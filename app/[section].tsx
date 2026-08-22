@@ -1503,6 +1503,15 @@ export default function SectionScreen() {
               <Pressable onPress={() => setCircuitZoom((value) => Math.max(1, Number((value - 0.25).toFixed(2))))} style={[styles.zoomButton, { backgroundColor: colors.surface, borderColor: "#7C3AED", borderWidth: 1 }]}><Text style={[styles.zoomButtonText, { color: "#7C3AED" }]}>−</Text></Pressable>
             </View>
           </View>
+          <Text style={[styles.circuitImageTitle, { color: "#166534" }]}>أنواع فلاتر الهواء داخل وحدة AHU</Text>
+          <View style={[styles.imageViewer, { backgroundColor: "#F8FAFC", borderColor: colors.border }]}>
+            <ScrollView horizontal nestedScrollEnabled directionalLockEnabled={false} showsHorizontalScrollIndicator contentContainerStyle={styles.imageScroller}>
+              <ScrollView nestedScrollEnabled directionalLockEnabled={false} showsVerticalScrollIndicator contentContainerStyle={styles.imageVerticalScroller} style={{ width: Math.max(520, 520 * circuitZoom), height: 380 }}>
+                <Image source={require("@/assets/references/air-filters-ahu-reference.png")} resizeMode="contain" style={{ width: 520 * circuitZoom, height: Math.round((520 / 1.5) * circuitZoom) }} />
+              </ScrollView>
+            </ScrollView>
+          </View>
+          <Text style={[styles.sectionHint, { color: colors.muted }]}>الصورة الجديدة مضافة كمرجع إضافي، ويمكن تكبيرها وتحريكها لرؤية تفاصيل كل نوع فلتر.</Text>
           {hvacCircuitSections.map((circuit) => (
             <View key={circuit.id} style={[styles.circuitSectionCard, { backgroundColor: colors.surface, borderColor: circuit.color }]}>
               <View style={[styles.circuitSectionHeader, { backgroundColor: `${circuit.color}16` }]}>
